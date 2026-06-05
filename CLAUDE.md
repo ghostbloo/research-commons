@@ -21,7 +21,6 @@ Backend (run from repo root):
 npm run dev      # tsx watch src/index.ts — auto-reload on :3020
 npm run build    # tsc — also the typecheck/lint gate (no separate linter)
 npm start        # node dist/index.js (requires build first)
-npm run migrate  # tsx src/database/migrate.ts — SQLite migrations
 ```
 
 Frontend (run from `frontend/`):
@@ -49,7 +48,7 @@ There is no automated test suite. `test-api.sh` is a manual curl smoke script; v
 - **Event store (append-only JSONL under `data/`)** for research-critical, schema-flexible data: submissions + messages (`src/storage/` — `EventStore`, `ShardedEventStore`, `SubmissionStore`), plus per-domain JSONL stores in `src/services/*-store.ts` (users, topics/criteria, ontologies, rankings, models, folders). These classes load events on `init()` and keep in-memory caches; writes append events.
 - **SQLite (`data/research.db`, schema in `src/database/schema.sql`)** for social/query-heavy data with stable schemas: selections, `selection_tags` (tag votes), comments, ratings, and the submission↔ontology / submission↔ranking attachment tables. Wrapped by `AnnotationDatabase` (`src/database/db.ts`).
 
-Ratings are submission-level and live in **both** worlds (JSONL per-submission and a SQLite table) — see `docs/ontology.md` for why.
+Ratings are submission-level (attached to the whole submission, not a selection) and live in SQLite — see `docs/ontology.md`.
 
 **Dependency injection via `AppContext`.** `src/index.ts` constructs every store once, bundles them into an `AppContext`, and passes it to route factories (`createAuthRoutes(ctx)`, `createAnnotationRoutes(ctx)`, …). Routes never instantiate stores themselves — they receive them through the context. To add a route module, write a `createXRoutes(ctx)` factory in `src/routes/` and mount it in `index.ts`.
 

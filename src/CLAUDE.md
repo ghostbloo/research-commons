@@ -30,12 +30,12 @@ The JSONL-backed stores in `services/*-store.ts` all share one shape (see `ontol
 
 `storage/event-store.ts` is the low-level append-only JSONL primitive. `EventStore` = one file; `ShardedEventStore` = many files under `<base>/<first-2-chars-of-id>/<id>/<filename>`, with per-shard `EventStore` instances cached in a `Map`. `appendEvent` does `fsync` on every write (durable, not batched).
 
-`storage/submission-store.ts` is the only consumer of `ShardedEventStore`. Per submission it keeps three JSONL files — `metadata.jsonl`, `messages.jsonl`, `ratings.jsonl` — plus a single global `index.jsonl` of submission IDs (the only way to enumerate submissions; there is no directory scan). Notable behaviors:
+`storage/submission-store.ts` is the only consumer of `ShardedEventStore`. Per submission it keeps two JSONL files — `metadata.jsonl` and `messages.jsonl` — plus a single global `index.jsonl` of submission IDs (the only way to enumerate submissions; there is no directory scan). Notable behaviors:
 
 - **Lazy load + LRU-ish unload.** `getSubmission`/`getMessages` load and cache on first access and bump `lastAccessed`; `unloadInactive(maxAge)` evicts stale entries. (Nothing currently calls `unloadInactive` on a timer — caches grow until restart.)
 - **State is reconstructed by replaying events.** A submission = the `submission_created` event with all later `submission_updated` events merged over it (`metadata` merged separately so it isn't clobbered). Messages = `message_added` events with `message_updated` patches applied. So a partial update like `updateMessage(id, {hidden_from_models: true})` is an event, not a rewrite.
 - **The message tree is validated on create** (`validateMessageTree` / `detectCycles`): exactly one root (`parent_message_id === null`), no dangling parents, no cycles, and `participant_type === 'model'` requires `model_info`. Branching conversations ("loom" submission type) are expressed purely as the parent-pointer tree of messages — there is no separate branch entity.
-- **Ratings live in SQLite, not here.** The `ratings.jsonl` file and the rating methods in `SubmissionStore` are dead/deprecated; the comment in the file claiming ratings are dual-written is stale. New rating code goes through `AnnotationDatabase` only (`annotations.ts` creates ratings solely via `annotationDb.createRating`).
+- **Ratings live in SQLite, not here.** `SubmissionStore` has no ratings path; rating code goes through `AnnotationDatabase` only (`annotations.ts` creates ratings solely via `annotationDb.createRating`).
 
 ## SQLite vs JSONL — which store does data go in?
 
@@ -46,7 +46,7 @@ The decision is by data shape, not by domain (see root `CLAUDE.md` for the ratio
 
 `AnnotationDatabase` is a thin hand-written wrapper over `better-sqlite3` (synchronous API — no `await`). It enables WAL + `foreign_keys = ON`, and `ON DELETE CASCADE` is relied on (e.g. deleting a selection cleans up its tags/comments). To add SQLite state: add the `CREATE TABLE IF NOT EXISTS` to `schema.sql` and the typed accessor methods to `db.ts`.
 
-**Migrations are run-on-construct, not a separate step.** `AnnotationDatabase`'s constructor `exec`s the entire `schema.sql` every boot, which is why every statement is `IF NOT EXISTS`. There is no incremental migration framework — `package.json`'s `npm run migrate` points at `src/database/migrate.ts`, **which does not exist**; don't rely on that script. Schema changes that aren't additive (altering a column, backfilling) currently have no home and must be handled manually.
+**Migrations are run-on-construct, not a separate step.** `AnnotationDatabase`'s constructor `exec`s the entire `schema.sql` every boot, which is why every statement is `IF NOT EXISTS`. There is no incremental migration framework and no standalone migrate command. Schema changes that aren't additive (altering a column, backfilling) currently have no home and must be handled manually.
 
 ## Route modules
 
