@@ -45,7 +45,6 @@ The annotation domain model and the component map (AnnotationWorkspace, Selectio
 
 - `views/AnnotationWorkspace.vue` is the orchestrator (~2800 lines): it owns nearly all annotation state, loads everything in `loadData()`, and passes data down + handles events up. Child components are presentational; logic lives here.
 - The right-margin annotation layout (collision-avoided tag labels / comment cards, vertical selection bars, connector paths) is computed by `utils/layout-manager.ts` (`AnnotationLayoutManager`) from live DOM `getBoundingClientRect()` measurements keyed off `[data-message-id]` attributes — it is layout math, not domain logic. `AnnotationMargin.vue` consumes its `MarginAnnotation`/`VerticalBar` output.
-- There is a stray `views/.!99900!AnnotationWorkspace.vue` artifact (interrupted file op) — ignore/delete, it's not a real file.
 
 ## Navigation & UI components
 

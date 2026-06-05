@@ -23,7 +23,6 @@ npm run dev          # build:shared, then tsx watch src/index.ts — auto-reload
 npm run build        # build:shared, then tsc — the typecheck/lint gate (no separate linter)
 npm run build:shared # compile the shared/ package to shared/dist (both builds depend on it)
 npm start            # node dist/index.js (requires build first)
-npm run migrate      # tsx src/database/migrate.ts — SQLite migrations
 ```
 
 Frontend (run from `frontend/`):
@@ -41,7 +40,7 @@ There is no automated test suite. `test-api.sh` is a manual curl smoke script; v
 ### Local-dev gotchas
 
 - **Run the backend on the default port 3020.** The Vite dev proxy targets `http://localhost:3020` (`frontend/vite.config.ts`); changing `PORT` means also editing that proxy target, or frontend API calls break.
-- **Native deps** (`better-sqlite3`, `bcrypt`, `sharp`) compile from source on this machine (no prebuilt binaries for the local Node). They need a C++ toolchain — `gcc-c++` must be installed (already fixed on this box; one-shot fallback: `nix-shell -p gcc --run "npm install"`).
+- **Native deps** (`better-sqlite3`, `bcrypt`, `sharp`) compile from source, so a C++ toolchain is required (Xcode Command Line Tools on macOS, `build-essential` on Linux). Prefer a current LTS Node — very new major versions may not have prebuilt binaries yet.
 - First boot seeds default ontologies/rankings/models/topic but creates **no** admin user. Use `create-admin-user.ts` / `make-admin.sh`, or register through the UI.
 
 ## Architecture
