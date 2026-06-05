@@ -16,3 +16,6 @@ frontend/dist/
 frontend/node_modules/
 API.md
 files/
+
+# Claude Code agent worktrees (transient)
+.claude/worktrees/
