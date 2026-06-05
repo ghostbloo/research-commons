@@ -51,7 +51,7 @@
                     </span>
                   </div>
                   <button 
-                    @click="emit('reply-to-comment', comment.id)"
+                    @click="emit('reply-to-comment', comment.selection_id, comment.id)"
                     class="text-xs text-blue-400/70 hover:text-blue-400 flex items-center gap-1"
                   >
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,6 +129,7 @@ import type { Message as MessageType } from '@/types'
 
 interface InlineComment {
   id: string
+  selection_id: string
   content: string
   author_id: string
   created_at: string
@@ -197,7 +198,7 @@ const emit = defineEmits<{
   'delete-selection': [selectionId: string]
   'delete-comment': [commentId: string]
   'remove-tag': [selectionId: string, tagId: string]
-  'reply-to-comment': [commentId: string]
+  'reply-to-comment': [selectionId: string, parentCommentId: string]
 }>()
 
 // Expanded state for comments and replies
