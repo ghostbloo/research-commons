@@ -200,10 +200,10 @@
                     {{ tag }}
                   </span>
                   <span
-                    v-if="submission.metadata.tags?.length > 3"
+                    v-if="(submission.metadata.tags?.length ?? 0) > 3"
                     class="px-2.5 py-1 text-gray-400 dark:text-gray-500 text-xs"
                   >
-                    +{{ submission.metadata.tags.length - 3 }}
+                    +{{ (submission.metadata.tags?.length ?? 0) - 3 }}
                   </span>
                 </div>
               </div>

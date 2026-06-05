@@ -12,6 +12,9 @@ export interface User {
 export interface ContentBlock {
   type: 'text' | 'image' | 'thinking'
   text?: string
+  // Image blocks carry mime_type/data at the top level (matches backend ImageContentBlockSchema)
+  mime_type?: string
+  data?: string
   image?: { mime_type: string; data: string }
   thinking?: { content: string; signature?: string }
 }
@@ -61,6 +64,7 @@ export interface Submission {
     model_summary?: string[]
     tags?: string[]
     description?: string
+    message_count?: number
   }
   submitted_at: string
 }
@@ -73,6 +77,7 @@ export interface Selection {
   start_offset?: number
   end_message_id: string
   end_offset?: number
+  selected_text?: string
   label?: string
   annotation_tags: string[]  // Tag IDs
   tag_attributions?: Array<{
@@ -91,6 +96,9 @@ export interface Comment {
   content: string
   created_at: string
   updated_at?: string
+  // Generic target fields used by some annotation views
+  target_type?: string
+  target_id?: string
 }
 
 export interface Rating {
@@ -101,6 +109,7 @@ export interface Rating {
   score: number
   created_at: string
   updated_at?: string
+  target_id?: string
 }
 
 export interface Topic {

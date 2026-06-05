@@ -71,6 +71,8 @@ The backlog lives in GitHub issues. When work has an order — issue B shouldn't
 gh api --method POST repos/<owner>/<repo>/issues/<n>/dependencies/blocked_by -F issue_id=<blocker-id>
 ```
 
+**Link every PR to its issue.** A PR that resolves an issue must put `Closes #N` (or `Fixes #N`) in its body, so merging auto-closes the issue and the issue↔PR graph stays honest. A PR that touches but doesn't fully resolve an issue should say `Refs #N` instead.
+
 ## Docs map
 
 - `docs/ontology.md` — annotation/ranking domain model (maintained, reconciled against code). Start here for annotation work.
