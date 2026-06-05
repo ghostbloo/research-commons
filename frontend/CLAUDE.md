@@ -49,7 +49,7 @@ The annotation domain model and the component map (AnnotationWorkspace, Selectio
 
 ## Navigation & UI components
 
-`components/LeftSidebar.vue` (wrapping `SidebarContent.vue`) is the shared nav — a fixed desktop sidebar / mobile teleport overlay. It is **imported and rendered by each top-level view individually**, not by `App.vue`. Add it to new full-page views for consistent chrome. `components/ui/Base*.vue` (BaseButton/Card/Input/Modal) exist but are currently **unused** — most components hand-roll Tailwind; don't assume a design-system layer. `views/BrowseViewNew.vue` is dead (unrouted); `BrowseView.vue` is the live browse page.
+`components/LeftSidebar.vue` (wrapping `SidebarContent.vue`) is the shared nav — a fixed desktop sidebar / mobile teleport overlay. It is **imported and rendered by each top-level view individually**, not by `App.vue`. Add it to new full-page views for consistent chrome. `components/ui/Base*.vue` (BaseButton/Card/Input/Modal) exist but are currently **unused** — most components hand-roll Tailwind; don't assume a design-system layer.
 
 ## Styling & markdown
 
