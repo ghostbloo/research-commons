@@ -50,17 +50,6 @@ export const useSubmissionsStore = defineStore('submissions', () => {
     }
   }
 
-  async function fetchComments(submissionId: string) {
-    try {
-      const response = await annotationsAPI.getComments(submissionId)
-      comments.value.set(submissionId, response.data.comments)
-      return response.data.comments
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch comments'
-      throw err
-    }
-  }
-
   async function createSelection(data: Omit<Selection, 'id' | 'created_by' | 'created_at'>) {
     try {
       const response = await annotationsAPI.createSelection(data)
@@ -142,7 +131,6 @@ export const useSubmissionsStore = defineStore('submissions', () => {
     fetchSubmission,
     fetchMessages,
     fetchSelections,
-    fetchComments,
     createSelection,
     createComment,
     createRating,

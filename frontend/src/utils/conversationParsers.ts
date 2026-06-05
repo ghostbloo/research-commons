@@ -82,7 +82,7 @@ export function parseArcConversation(data: any): {
 
     // Extract content blocks from branch
     // ARC format has contentBlocks array with thinking/text blocks
-    let contentBlocks = []
+    let contentBlocks: any[] = []
     if (activeBranch.contentBlocks && Array.isArray(activeBranch.contentBlocks)) {
       // Transform ARC contentBlocks format to our format
       contentBlocks = activeBranch.contentBlocks.map((block: any) => {
@@ -156,7 +156,7 @@ export function parseAnthropicConversation(data: any): {
     const messageId = crypto.randomUUID()
 
     // Extract content blocks
-    let contentBlocks = []
+    let contentBlocks: any[] = []
     if (Array.isArray(msg.content)) {
       contentBlocks = msg.content
     } else if (typeof msg.content === 'string') {

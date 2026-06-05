@@ -63,6 +63,17 @@ Ratings are submission-level and live in **both** worlds (JSONL per-submission a
 
 No env vars are required to boot (all have defaults). `JWT_SECRET` is the one to set anywhere real — its default is a public hardcoded string. Optional integrations degrade gracefully when unset: Discord import (`DISCORD_API_URL`/`DISCORD_API_TOKEN`) and password-reset email (`RESEND_API_KEY`) just disable their endpoints. Full variable reference is in `README.md`.
 
+## Issues
+
+The backlog lives in GitHub issues. When work has an order — issue B shouldn't start until issue A lands — record it with **GitHub's native issue dependencies** ("blocked by" / "blocking"), not just a sentence in the body, so the sequence is machine-readable for the agents that pick up work. An agent should confirm an issue isn't blocked before starting it. Set relations from the issue sidebar, or via the API:
+
+```bash
+# make <blocker-id> block issue <n>; issue_id must be the numeric id (gh api .../issues/<n> --jq .id), and -F (not -f) so it's sent as an integer
+gh api --method POST repos/<owner>/<repo>/issues/<n>/dependencies/blocked_by -F issue_id=<blocker-id>
+```
+
+**Link every PR to its issue.** A PR that resolves an issue must put `Closes #N` (or `Fixes #N`) in its body, so merging auto-closes the issue and the issue↔PR graph stays honest. A PR that touches but doesn't fully resolve an issue should say `Refs #N` instead.
+
 ## Docs map
 
 - `docs/ontology.md` — annotation/ranking domain model (maintained, reconciled against code). Start here for annotation work.

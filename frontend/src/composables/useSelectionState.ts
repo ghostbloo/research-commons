@@ -112,6 +112,7 @@ export function useSelectionState(
   const inlineComments = computed(() => {
     interface InlineComment {
       id: string
+      selection_id: string
       content: string
       author_id: string
       created_at: string
@@ -139,6 +140,7 @@ export function useSelectionState(
       for (const comment of data.comments) {
         const inlineComment: InlineComment = {
           id: comment.id,
+          selection_id: sel.id,
           content: comment.content,
           author_id: comment.author_id,
           created_at: comment.created_at,
@@ -287,8 +289,8 @@ export function useSelectionState(
           }
         })
 
-        // Find direct replies to this comment
-        const directReplies = data.comments.filter(c => c.parent_id === comment.id)
+        // Find direct replies to this comment (data is guaranteed non-null by the guard above)
+        const directReplies = data!.comments.filter(c => c.parent_id === comment.id)
         if (directReplies.length === 0) return
 
         // For depth 0 (root comments): show 1 reply, collapse rest
