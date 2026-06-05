@@ -7,7 +7,6 @@ export const useSubmissionsStore = defineStore('submissions', () => {
   const submissions = ref<Map<string, Submission>>(new Map())
   const messages = ref<Map<string, Message[]>>(new Map())
   const selections = ref<Map<string, Selection[]>>(new Map())
-  const comments = ref<Map<string, Comment[]>>(new Map())
   const ratings = ref<Map<string, Rating[]>>(new Map())
   
   const loading = ref(false)
@@ -46,17 +45,6 @@ export const useSubmissionsStore = defineStore('submissions', () => {
       return response.data.selections
     } catch (err: any) {
       error.value = err.response?.data?.error || 'Failed to fetch selections'
-      throw err
-    }
-  }
-
-  async function fetchComments(submissionId: string) {
-    try {
-      const response = await annotationsAPI.getComments(submissionId)
-      comments.value.set(submissionId, response.data.comments)
-      return response.data.comments
-    } catch (err: any) {
-      error.value = err.response?.data?.error || 'Failed to fetch comments'
       throw err
     }
   }
@@ -128,10 +116,6 @@ export const useSubmissionsStore = defineStore('submissions', () => {
     return selections.value.get(submissionId) || []
   }
 
-  function getComments(submissionId: string) {
-    return comments.value.get(submissionId) || []
-  }
-
   function getRatings(submissionId: string) {
     return ratings.value.get(submissionId) || []
   }
@@ -142,14 +126,12 @@ export const useSubmissionsStore = defineStore('submissions', () => {
     fetchSubmission,
     fetchMessages,
     fetchSelections,
-    fetchComments,
     createSelection,
     createComment,
     createRating,
     getSubmission,
     getMessages,
     getSelections,
-    getComments,
     getRatings,
     getCommentsBySelection,
     getRatingsBySubmission

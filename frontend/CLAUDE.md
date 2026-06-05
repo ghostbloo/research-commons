@@ -13,7 +13,7 @@ Frontend-specific notes for `frontend/src/`. The repo-root `CLAUDE.md` is auto-l
 Pinia is barely used. There are only two stores (`stores/auth.ts`, `stores/submissions.ts`), and **the normal pattern is for a view to import an API group from `services/api.ts` and call it directly** — 14 of 15 views do this, holding their own `ref` state. Only `AnnotationWorkspace.vue` touches `useSubmissionsStore`, and even it calls `services/api.ts` directly for most things. So:
 
 - Don't reach for a store when adding a feature. Add the endpoint group to `services/api.ts`, import it in your view, manage local state with `ref`. That matches the codebase.
-- `stores/submissions.ts` is a thin caching layer (Maps keyed by submission id) used only by the annotation workspace. It's incomplete — e.g. `fetchComments` calls a non-existent `annotationsAPI.getComments`; prefer the per-selection/per-submission getters that work.
+- `stores/submissions.ts` is a thin caching layer (Maps keyed by submission id) used only by the annotation workspace; not every getter is wired up (e.g. the `ratings` cache is never populated), so prefer the ones the workspace actually calls — `getCommentsBySelection`, `getRatingsBySubmission`.
 - Both stores are **setup-style** (`defineStore('id', () => { ... })` returning refs/functions), not options-style. Match that if you add one.
 
 ## API client (`services/api.ts`)
@@ -45,11 +45,10 @@ The annotation domain model and the component map (AnnotationWorkspace, Selectio
 
 - `views/AnnotationWorkspace.vue` is the orchestrator (~2800 lines): it owns nearly all annotation state, loads everything in `loadData()`, and passes data down + handles events up. Child components are presentational; logic lives here.
 - The right-margin annotation layout (collision-avoided tag labels / comment cards, vertical selection bars, connector paths) is computed by `utils/layout-manager.ts` (`AnnotationLayoutManager`) from live DOM `getBoundingClientRect()` measurements keyed off `[data-message-id]` attributes — it is layout math, not domain logic. `AnnotationMargin.vue` consumes its `MarginAnnotation`/`VerticalBar` output.
-- There is a stray `views/.!99900!AnnotationWorkspace.vue` artifact (interrupted file op) — ignore/delete, it's not a real file.
 
 ## Navigation & UI components
 
-`components/LeftSidebar.vue` (wrapping `SidebarContent.vue`) is the shared nav — a fixed desktop sidebar / mobile teleport overlay. It is **imported and rendered by each top-level view individually**, not by `App.vue`. Add it to new full-page views for consistent chrome. `components/ui/Base*.vue` (BaseButton/Card/Input/Modal) exist but are currently **unused** — most components hand-roll Tailwind; don't assume a design-system layer. `views/BrowseViewNew.vue` is dead (unrouted); `BrowseView.vue` is the live browse page.
+`components/LeftSidebar.vue` (wrapping `SidebarContent.vue`) is the shared nav — a fixed desktop sidebar / mobile teleport overlay. It is **imported and rendered by each top-level view individually**, not by `App.vue`. Add it to new full-page views for consistent chrome. `components/ui/Base*.vue` (BaseButton/Card/Input/Modal) exist but are currently **unused** — most components hand-roll Tailwind; don't assume a design-system layer. `BrowseView.vue` is the live browse page.
 
 ## Styling & markdown
 
