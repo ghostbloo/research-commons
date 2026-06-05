@@ -32,9 +32,9 @@ npm install
 
 The backend reads configuration from environment variables (loaded from a `.env`
 file in the project root via `dotenv`). There is no `.env.example` checked in, so
-create `.env` yourself. The app starts with zero configuration (all vars have
-defaults), but several defaults are insecure or disable features — at minimum set
-`JWT_SECRET` (see RECOMMENDED below).
+create `.env` yourself. In development the app starts with zero configuration,
+but in production `JWT_SECRET` is required — the server refuses to boot without
+it (see RECOMMENDED below). Other defaults are insecure or disable features.
 
 ```bash
 # .env (project root)
@@ -47,18 +47,23 @@ Variables are grouped by how much you need to care about them.
 
 #### REQUIRED
 
-None. The server boots and serves the core flow (register, login, submit,
-annotate) with no environment variables set. The items below are still strongly
-recommended or enable optional features.
+In development, none — the server boots and serves the core flow (register,
+login, submit, annotate) with no environment variables set. In production,
+`JWT_SECRET` is required (see RECOMMENDED below); the server refuses to start
+without it. The other items below are still strongly recommended or enable
+optional features.
 
-#### RECOMMENDED (insecure default — override before any real/shared deployment)
+#### RECOMMENDED (required in production)
 
 - **`JWT_SECRET`** — Secret key used to sign and verify auth JWTs
-  (`src/middleware/auth.ts:5`).
-  - Default: `'change-this-in-production'` (hardcoded fallback).
-  - Without it: the app runs, but **all tokens are signed with a publicly known
-    secret**, so anyone can forge admin tokens. Set this to a long random string
-    in any non-throwaway environment. Changing it invalidates existing tokens.
+  (`src/middleware/auth.ts`).
+  - **Production (`NODE_ENV=production`):** required. The server refuses to
+    start if it's unset (or left at the old `'change-this-in-production'`
+    default), because a known secret lets anyone forge admin tokens.
+  - **Development:** optional. If unset, a random secret is generated per boot,
+    which invalidates existing sessions on every restart. Set a fixed value to
+    keep sessions across restarts. Changing it always invalidates existing
+    tokens.
 
 #### OPTIONAL (feature flags / paths with safe defaults)
 
