@@ -6,10 +6,11 @@ Anima Research Commons — a platform for collecting, annotating, and rating cro
 
 ## Layout
 
-Two npm packages in one repo:
+Three npm packages in one repo, wired together as an **npm workspace** (root `package.json` declares `"workspaces": ["shared", "frontend"]`):
 
 - **Backend** lives at the repo root: source in `src/`, run with the root `package.json`. (Note: it's `src/`, not `backend/src/`.)
 - **Frontend** lives in `frontend/`, its own `package.json`, Vue 3 + Vite + Pinia + Tailwind.
+- **Shared** lives in `shared/` (`@anima-labs/research-commons-shared`): the single source of truth for the domain model — Zod schemas + the types inferred from them. Both other packages depend on it. It **compiles to `shared/dist`** via `npm run build:shared`, which every build/dev script runs first; the backend `tsc` build imports its `.d.ts` and the backend runtime imports its `.js`, so run a build (or `npm run build:shared`) once after cloning. (The frontend imports it type-only, so the frontend bundle never needs `shared/dist` at runtime.) See "Shared types" below.
 
 `data/` holds all runtime state (JSONL stores + SQLite); it's created on first run and is not source. The annotation domain model (ontologies, tags, selections, ratings, ranking systems) is documented in `docs/ontology.md` — read it before touching annotation code.
 
@@ -18,10 +19,11 @@ Two npm packages in one repo:
 Backend (run from repo root):
 
 ```bash
-npm run dev      # tsx watch src/index.ts — auto-reload on :3020
-npm run build    # tsc — also the typecheck/lint gate (no separate linter)
-npm start        # node dist/index.js (requires build first)
-npm run migrate  # tsx src/database/migrate.ts — SQLite migrations
+npm run dev          # build:shared, then tsx watch src/index.ts — auto-reload on :3020
+npm run build        # build:shared, then tsc — the typecheck/lint gate (no separate linter)
+npm run build:shared # compile the shared/ package to shared/dist (both builds depend on it)
+npm start            # node dist/index.js (requires build first)
+npm run migrate      # tsx src/database/migrate.ts — SQLite migrations
 ```
 
 Frontend (run from `frontend/`):
@@ -32,7 +34,7 @@ npm run build        # vite build (no typecheck)
 npm run build:check  # vue-tsc + vite build — use this to typecheck the frontend
 ```
 
-Full-stack build from root: `npm run build:full` (tsc + frontend build).
+Full-stack build from root: `npm run build:full` (shared + tsc + frontend build). All build/dev scripts run `build:shared` first, so the compiled `shared/dist` the other two packages import is always present.
 
 There is no automated test suite. `test-api.sh` is a manual curl smoke script; verification is done via the typecheck builds above and by exercising the running app.
 
@@ -55,7 +57,7 @@ Ratings are submission-level and live in **both** worlds (JSONL per-submission a
 
 **Auth & roles.** JWT signed with `JWT_SECRET` (`src/middleware/auth.ts`). `authenticateToken` populates `req.user`/`req.userId`; `requireRole(role)` gates endpoints. Roles: `viewer`, `contributor` (default), `rater`, `expert`, `researcher`, `agent`, `admin`. The token carries roles, so role changes require re-login to take effect.
 
-**Types are duplicated, for now.** Zod schemas in `src/types/` define and validate the backend domain; `frontend/src/types/` hand-mirrors them as plain TS. When changing a shared shape, update both sides (consolidation tracked in issue #2).
+**Shared types — single source of truth.** The domain model lives once, as Zod schemas, in the `shared/` workspace package (`shared/src/*.ts`, e.g. `submission.ts`, `annotation.ts`, `ontology.ts`, `ranking.ts`, `research.ts`, `model.ts`, `folder.ts`). The backend imports schemas + inferred (`z.infer`) types from `@anima-labs/research-commons-shared` and uses the schemas for runtime validation. The frontend imports the *same* definitions in `frontend/src/types/`, wrapping each in `Serialized<T>` (a helper in `shared/src/serialized.ts` that maps `Date → string`, since dates arrive as JSON strings over the wire). Change a shared shape in **one** place (`shared/`) and rebuild (`npm run build:shared`, or any build script, which run it first); both sides pick it up. This resolved issue #2 — there is no longer a hand-mirrored parallel copy.
 
 **Frontend.** Vue 3 SPA. API client (`frontend/src/services/api.ts`) uses a relative `/api` base — no `VITE_*` env vars needed. Pinia stores in `frontend/src/stores/`, views in `frontend/src/views/`, the annotation UI in `frontend/src/components/` (see `docs/ontology.md` for the annotation component map). In production (`NODE_ENV=production`), the backend serves the built frontend from `frontend/dist` with an SPA fallback.
 

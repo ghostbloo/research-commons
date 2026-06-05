@@ -9,7 +9,7 @@ import {
   Selection,
   Comment,
   Rating
-} from '../types/annotation.js';
+} from '@anima-labs/research-commons-shared';
 
 export function createAnnotationRoutes(context: AppContext): Router {
   const router = Router();

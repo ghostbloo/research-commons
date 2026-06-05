@@ -1,29 +1,11 @@
-export interface AnnotationTag {
-  id: string
-  ontology_id: string
-  name: string
-  description: string
-  color: string
-  examples?: string[]
-}
+// Derived from the canonical Zod schemas in @anima-labs/research-commons-shared (issue #2).
+import type {
+  Serialized,
+  AnnotationTag as AnnotationTagDTO,
+  AnnotationOntology as AnnotationOntologyDTO,
+  SubmissionOntology as SubmissionOntologyDTO,
+} from '@anima-labs/research-commons-shared'
 
-export interface AnnotationOntology {
-  id: string
-  name: string
-  description: string
-  category: 'model-behavior' | 'interviewer-quality' | 'custom'
-  created_by: string
-  created_at: string
-  permissions: 'public' | 'expert-only'
-}
-
-export interface SubmissionOntology {
-  id: string
-  submission_id: string
-  ontology_id: string
-  attached_by: string
-  attached_at: string
-  usage_permissions: 'anyone' | 'expert-only' | 'researcher-only'
-  is_default: boolean
-}
-
+export type AnnotationTag = Serialized<AnnotationTagDTO>
+export type AnnotationOntology = Serialized<AnnotationOntologyDTO>
+export type SubmissionOntology = Serialized<SubmissionOntologyDTO>

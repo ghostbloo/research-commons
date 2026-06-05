@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import { EventStore } from '../storage/event-store.js';
-import { User } from '../types/research.js';
+import { User } from '@anima-labs/research-commons-shared';
 
 interface PasswordResetToken {
   userId: string;

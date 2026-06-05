@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { AppContext } from '../index.js';
 import { generateToken, authenticateToken, AuthRequest } from '../middleware/auth.js';
-import { RegisterUserRequestSchema, LoginRequestSchema, UpdateProfileRequestSchema, UpdatePasswordRequestSchema } from '../types/research.js';
+import { RegisterUserRequestSchema, LoginRequestSchema, UpdateProfileRequestSchema, UpdatePasswordRequestSchema } from '@anima-labs/research-commons-shared';
 
 const ForgotPasswordRequestSchema = z.object({
   email: z.string().email('Invalid email address')

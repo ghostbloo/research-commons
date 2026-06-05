@@ -54,14 +54,14 @@ Every file in `routes/` exports a `createXRoutes(context: AppContext): Router` f
 
 Conventions inside routes:
 
-- **Validation:** request bodies are parsed with the Zod request schemas from `types/` (`Schema.parse(req.body)` — the throwing form, never `safeParse`). The `catch` block checks `error.name === 'ZodError'` and returns `400 { error, details: error.errors }`, else logs and returns `500`. Match this shape.
+- **Validation:** request bodies are parsed with the Zod request schemas from `@anima-labs/research-commons-shared` (`Schema.parse(req.body)` — the throwing form, never `safeParse`). The `catch` block checks `error.name === 'ZodError'` and returns `400 { error, details: error.errors }`, else logs and returns `500`. Match this shape.
 - **Auth middleware** (from `middleware/auth.ts`) is applied per-route, not globally: `authenticateToken` (populates `req.user`/`req.userId` from the JWT, 401/403 on failure), `requireRole(role)` / `requireAnyRole([...])` for gating, and `optionalAuth` for endpoints that behave differently when logged in. Several public-read endpoints (e.g. `GET /submissions`) skip the middleware and instead **manually `jwt.verify`** the `Authorization` header inline to decide visibility — that's intentional, so guests still get a response.
 - **Visibility/permission filtering lives in the route, not the store.** Stores return everything; routes filter by the submission/folder `visibility` enum and the caller's roles (the `canAccess*` helpers in `folders.ts` and the inline filters in `submissions.ts` are the reference implementations). The JWT carries roles, but for authoritative role checks routes re-fetch the user via `userStore.getUserById` rather than trusting the token's role array.
 - Topic-derived vs explicitly-attached ontologies/rankings are merged at read time in `submission-systems.ts` (topic attachments are dynamic lookups; explicit ones come from the SQLite attachment tables and can be detached unless `is_from_topic`).
 
 ## Types
 
-`types/*.ts` are the source of truth for backend shapes: each file defines Zod schemas and derives the TS type with `z.infer`. Request DTOs are separate `*RequestSchema`s (e.g. server fills `id`/`submission_id`, so create-request schemas omit them). The role enum lives in `UserSchema` in `types/research.ts`. These are hand-mirrored — not generated — into `frontend/src/types/` (issue #2); change both sides together.
+The domain shapes are defined once in the `shared/` workspace package (`@anima-labs/research-commons-shared`) and imported here as schemas + `z.infer` types. Each `shared/src/*.ts` file defines Zod schemas and derives the TS type with `z.infer`. Request DTOs are separate `*RequestSchema`s (e.g. server fills `id`/`submission_id`, so create-request schemas omit them). The role enum lives in `UserSchema` in `shared/src/research.ts`. The frontend derives its types from the same package (issue #2) — edit a schema once in `shared/src/`, run `npm run build:shared`, and both sides update.
 
 ## Importers
 

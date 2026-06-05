@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { AppContext } from '../index.js';
 import { authenticateToken, AuthRequest, requireRole } from '../middleware/auth.js';
-import { User } from '../types/research.js';
+import { User } from '@anima-labs/research-commons-shared';
 
 /**
  * Admin-only endpoints for user management

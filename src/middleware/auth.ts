@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../types/research.js';
+import { User } from '@anima-labs/research-commons-shared';
 
 export const JWT_SECRET = process.env.JWT_SECRET || 'change-this-in-production';
 

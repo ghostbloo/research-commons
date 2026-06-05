@@ -3,7 +3,7 @@
  * All importers (Discord, Slack, ARC, etc.) should implement this interface
  */
 
-import type { Message } from '../types/submission.js';
+import type { Message } from '@anima-labs/research-commons-shared';
 
 export interface ImportSource {
   type: 'discord' | 'slack' | 'arc' | 'other';

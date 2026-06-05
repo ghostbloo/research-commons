@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Frontend-specific notes for `frontend/src/`. The repo-root `CLAUDE.md` is auto-loaded alongside this one and covers repo layout, dev/build commands, the `/api` proxy, and the duplicated-types situation — see it first; this file does not repeat it.
+Frontend-specific notes for `frontend/src/`. The repo-root `CLAUDE.md` is auto-loaded alongside this one and covers repo layout, dev/build commands, the `/api` proxy, and the shared-types setup — see it first; this file does not repeat it.
 
 ## Bootstrap
 
@@ -29,7 +29,7 @@ Note the folder types (`Folder`, `FolderDetail`, etc.) and admin stats types (`A
 
 ## Types (`types/`)
 
-`types/index.ts` (+ `ontology.ts`, `ranking.ts`, re-exported from index) hand-mirror the backend Zod schemas as plain interfaces. Ontology/ranking/tag shapes are largely typed as `any` in the API layer, so the strong types are mostly `User`, `Submission`, `Message`/`ContentBlock`, `Selection`, `Comment`, `Rating`, `Topic`. When you change a shared shape, update the backend Zod side too (root `CLAUDE.md`, issue #2).
+`types/index.ts` (+ `ontology.ts`, `ranking.ts`, re-exported from index) no longer hand-mirror the backend types — they **derive** from the single source of truth, the `@anima-labs/research-commons-shared` workspace package (the backend Zod schemas). Each type is `Serialized<XDTO>`, where `Serialized<T>` (from the shared package) maps `Date → string` because dates arrive as JSON strings over the API. So `created_at`, `submitted_at`, `tagged_at`, etc. are `string` here, and `ContentBlock` is the schema's discriminated union (text/image/thinking/`tm_blob_file`), not a loose interface. Ontology/ranking/tag shapes are still largely typed as `any` in the API layer, so the strong types are mostly `User`, `Submission`, `Message`/`ContentBlock`, `Selection`, `Comment`, `Rating`, `Topic`. **To change a shared shape, edit the Zod schema in `shared/src/` and run `npm run build:shared`** — both sides update from the one definition (issue #2; root `CLAUDE.md`).
 
 ## Router & auth gating (`router/index.ts`)
 

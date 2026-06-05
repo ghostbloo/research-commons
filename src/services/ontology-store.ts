@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EventStore } from '../storage/event-store.js';
-import { AnnotationOntology, AnnotationTag } from '../types/ontology.js';
+import { AnnotationOntology, AnnotationTag } from '@anima-labs/research-commons-shared';
 
 /**
  * Manages ontologies and tags (event-sourced)

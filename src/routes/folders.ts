@@ -7,7 +7,7 @@ import {
   AddFolderMemberRequestSchema,
   AddFolderSubmissionRequestSchema,
   Folder
-} from '../types/folder.js';
+} from '@anima-labs/research-commons-shared';
 
 export function createFolderRoutes(context: AppContext): Router {
   const router = Router();
