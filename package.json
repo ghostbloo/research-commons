@@ -10,7 +10,6 @@
     "build:backend": "tsc",
     "build:frontend": "cd frontend && npm run build",
     "start": "node dist/index.js",
-    "migrate": "tsx src/database/migrate.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest"
