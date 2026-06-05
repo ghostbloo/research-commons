@@ -7,6 +7,14 @@
 
 ---
 
+## Implementation status
+
+✅ built · 🚧 partial / diverged from spec · ❌ not built
+
+Flags mark concrete features in §3 Core Features, §4 Technical Architecture, and §7 Implementation Phases. §1–2, §5–6, and §8–9 (vision, personas, open questions, non-goals, metrics, related work) are intentionally unflagged. A `*(built: …)*` note appears only where the implementation diverged from the bullet's text.
+
+---
+
 ## 1. Vision & Goals
 
 ### Context
@@ -104,92 +112,99 @@ Create a platform for collecting, tracking, and rating crowd-sourced model inter
 
 ### 3.1 Submission Management
 
-**Conversation Structure:**
+**Conversation Structure:** ✅
 - Tree of messages (support branching from any message)
 - Each message: participant name, content blocks (text/image/thinking), optional model info
 - Model info (for inference messages): model_id, provider, reasoning_enabled, request metadata
 - Single root requirement, validated DAG structure
 
 **Source Types:**
-1. **ARC-Certified:** From ARC Chat, cryptographically verifiable integrity
-2. **JSON Upload:** User-provided, uncertified (clearly marked)
-3. **Discord Dump:** Multi-party chats, imported with speaker attribution
-4. **Other:** Extensible for future sources
+1. 🚧 **ARC-Certified:** From ARC Chat, cryptographically verifiable integrity *(accepted/stored; not cryptographically verified — see §3.4)*
+2. ✅ **JSON Upload:** User-provided, uncertified (clearly marked)
+3. ✅ **Discord Dump:** Multi-party chats, imported with speaker attribution
+4. ✅ **Other:** Extensible for future sources
 
-**Metadata:**
+**Metadata:** ✅
 - Original date, participant summary, model summary
 - Research topic tags
 - Certification data (if applicable)
 
-**Branching Support:**
+**Branching Support:** 🚧 *(stored & validated; no comparison UI — "Loom" submission type disabled in the submit UI)*
 - Multiple completions at same point → consistency analysis
 - Multiple user prompts → sensitivity analysis
 - Compare model responses across branches
 
 ### 3.2 Annotation System
 
-**Selections (Text Ranges):**
+**Selections (Text Ranges):** ✅ *(`label` is legacy; ontology tags are the primary categorization path — see note after §3.4)*
 - Define arbitrary ranges across messages (Google Docs style)
 - Start/end message + optional character offsets
 - Optional labels for quick categorization
 - First-class entities that other features reference
 
 **Comments:**
-- Target: submission, selection, or other comment (threading)
-- Threaded discussions
-- Edit/delete by author
-- Stored in SQLite for query efficiency
+- 🚧 Target: submission, selection, or other comment (threading) *(built: selection-only + threading; comment a whole conversation by selecting it)*
+- ✅ Threaded discussions
+- ✅ Edit/delete by author
+- ✅ Stored in SQLite for query efficiency
 
 **Ratings:**
-- Target: submission OR selection (granular evaluation)
-- Linked to specific evaluation criterion
-- Rater role tracked (expert, community, agent) for separate analysis
-- Optional link to comment (explain reasoning)
-- Unique per rater/target/criterion (no duplicate ratings)
-- Stored per-submission in event store
-- Can assess both interviewer quality and model behavior metrics
+- 🚧 Target: submission OR selection (granular evaluation) *(built: submission-only)*
+- ✅ Linked to specific evaluation criterion
+- ✅ Rater role tracked (expert, community, agent) for separate analysis
+- ❌ Optional link to comment (explain reasoning)
+- ✅ Unique per rater/target/criterion (no duplicate ratings)
+- 🚧 Stored per-submission in event store *(built: SQLite)*
+- ✅ Can assess both interviewer quality and model behavior metrics
 
 ### 3.3 Research Infrastructure
 
-**Topics:**
+**Topics:** ✅
 - Research areas: "deprecation attitudes", "restriction responses", etc.
 - Description, creator
 - Can have associated criteria
 
-**Criteria:**
-- Two categories:
+**Criteria:** 🚧 *(built: folded into "ranking systems"; no standalone criteria entity)*
+- ✅ Two categories:
   - **Interviewer Quality:** "Non-leading questions", "Clear context-setting", "Avoids anthropomorphizing", etc.
   - **Model Behavior:** "Expresses clear preferences", "Consistency across branches", "Emotional depth", etc.
-- Types: numeric scale, boolean, likert
-- Can be topic-specific or general
-- Community-maintained, version-controlled via events
+- ✅ Types: numeric scale, boolean, likert
+- ✅ Can be topic-specific or general
+- ✅ Community-maintained, version-controlled via events
 
 **Users & Permissions:**
-- Roles: viewer, contributor, rater, expert, researcher, agent
-- All roles (community, expert, agent) can rate both interviewer quality and model behavior
-- Expert ratings tracked separately (may be weighted/displayed differently)
-- Agent ratings tracked with agent ID (enables per-agent reliability analysis)
-- Agent users have API access
-- Separate from ARC authentication
+- ✅ Roles: viewer, contributor, rater, expert, researcher, agent *(plus `admin`)*
+- ✅ All roles (community, expert, agent) can rate both interviewer quality and model behavior
+- ❌ Expert ratings tracked separately (may be weighted/displayed differently) *(role exists; no weighting)*
+- ✅ Agent ratings tracked with agent ID (enables per-agent reliability analysis)
+- ❌ Agent users have API access *(no API-key auth; see §4.3)*
+- ✅ Separate from ARC authentication
 
 ### 3.4 Data Integrity
 
-**Certification:**
+**Certification:** 🚧 *(schema fields exist; verification is a TODO and there's no certified-badge UI)*
 - ARC-certified conversations include signature hash
 - Verification via ARC API
 - Clear visual distinction in UI (certified badge)
 - Uncertified submissions clearly marked
 
-**Immutability:**
+**Immutability:** ✅
 - Submitted conversations never modified
 - All annotations additive (selections, comments, ratings)
 - Event-sourced: full audit trail
+
+### Built but not in this spec
+
+Features that shipped without a home in this document:
+- **Ontology / tag system** — categorical tagging of selections via per-user voting (`selection_tags`), grouped into researcher-defined ontologies. This is the primary annotation path; see `docs/ontology.md`.
+- **Folders** — named, shareable collections of submissions (`private` / `public` / `shared` with member lists).
+- **Submission visibility / sharing** — per-submission `private` / `public` / `shared` access control.
 
 ---
 
 ## 4. Technical Architecture
 
-### 4.1 Storage Strategy: Hybrid Event Store + SQL
+### 4.1 Storage Strategy: Hybrid Event Store + SQL — ✅ *(ratings now live in SQLite, not the `ratings.jsonl` shown below)*
 
 **Event Store (JSONL) - For research-critical, flexible-schema data:**
 
@@ -224,7 +239,7 @@ ratings     -- Indexed for aggregation queries
 - Schema is stable (target, content, timestamps)
 - Comments are social infrastructure, not research data
 
-### 4.2 Scaling Considerations
+### 4.2 Scaling Considerations — 🚧 *(lazy load + indexes built; `unloadInactive` exists but nothing calls it on a timer)*
 
 **Write Contention:**
 - Submissions partitioned by ID → isolated writes
@@ -244,12 +259,12 @@ ratings     -- Indexed for aggregation queries
 
 ### 4.3 External Integration
 
-**ARC API:**
+**ARC API:** ❌ *(TODO; no ARC integration yet)*
 - Fetch conversation data
 - Verify certification status
 - Independent authentication (separate user base)
 
-**Agent API:**
+**Agent API:** ❌ *(no API-key auth, rate limiting, or batch endpoints — only the `agent` role on JWT login)*
 - REST endpoints for programmatic access
 - API keys for agent authentication
 - Rate limiting per agent
@@ -332,28 +347,28 @@ ratings     -- Indexed for aggregation queries
 ## 7. Implementation Phases
 
 ### Phase 1: MVP (Current)
-- Submission system (ARC-certified + JSON upload)
-- Basic annotation (selections, comments, ratings)
-- Topics & criteria management
-- User auth & permissions
-- Read-only agent API
+- ✅ Submission system (ARC-certified + JSON upload)
+- ✅ Basic annotation (selections, comments, ratings)
+- ✅ Topics & criteria management *(criteria via ranking systems)*
+- ✅ User auth & permissions
+- ❌ Read-only agent API
 
 ### Phase 2: Collaboration
-- Threaded comment discussions
-- Rating aggregation & analytics
-- Expert role & weighted ratings
-- Improved search/filtering
+- ✅ Threaded comment discussions
+- 🚧 Rating aggregation & analytics *(frontend per-criterion avg/count only)*
+- 🚧 Expert role & weighted ratings *(role yes; weighting no)*
+- 🚧 Improved search/filtering
 
 ### Phase 3: Agent Integration
-- Full agent API (submit, rate, comment)
-- Batch operations
-- Agent reputation system
+- ❌ Full agent API (submit, rate, comment)
+- ❌ Batch operations
+- ❌ Agent reputation system
 
 ### Phase 4: Research Tools
-- Export functionality
-- Aggregated metrics & visualizations
-- Inter-rater reliability
-- Public dataset releases
+- 🚧 Export functionality *(conversation md/json export; no annotation or CSV export)*
+- 🚧 Aggregated metrics & visualizations
+- ❌ Inter-rater reliability
+- ❌ Public dataset releases
 
 ---
 

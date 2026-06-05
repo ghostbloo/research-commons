@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "build:check": "vue-tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
@@ -19,11 +22,14 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.0",
+    "@vue/test-utils": "^2.4.0",
     "autoprefixer": "^10.4.16",
+    "jsdom": "^25.0.0",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.0",
-    "vue-tsc": "^1.8.27"
+    "vitest": "^2.1.0",
+    "vue-tsc": "^2.2.12"
   }
 }
