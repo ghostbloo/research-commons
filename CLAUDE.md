@@ -21,7 +21,6 @@ Backend (run from repo root):
 npm run dev      # tsx watch src/index.ts — auto-reload on :3020
 npm run build    # tsc — also the typecheck/lint gate (no separate linter)
 npm start        # node dist/index.js (requires build first)
-npm run migrate  # tsx src/database/migrate.ts — SQLite migrations
 ```
 
 Frontend (run from `frontend/`):
