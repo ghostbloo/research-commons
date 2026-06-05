@@ -1,6 +1,6 @@
 export interface MarginAnnotation {
   id: string
-  type: 'tag-label' | 'comment-card'
+  type: 'tag-label' | 'comment-card' | 'expand-replies' | 'expand-top-level'
   anchorMessageId: string
   anchorOffset?: number
   priority: number
