@@ -110,6 +110,7 @@ export const SubmissionSchema = z.object({
     model_summary: z.array(z.string()).optional(),
     tags: z.array(z.string()).optional(),
     description: z.string().optional(),
+    message_count: z.number().optional(),
     pinned_message_id: z.string().uuid().optional()
   }).passthrough(), // Allow additional fields
   submitted_at: z.date(),

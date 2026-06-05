@@ -800,7 +800,7 @@ const displayTags = computed(() => {
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   
   const resolved = tags
-    .map(tag => {
+    .map((tag: string) => {
       // If it's a UUID, try to find the topic name
       if (uuidPattern.test(tag)) {
         const topic = availableTopics.value.find(t => t.id === tag)
@@ -809,11 +809,11 @@ const displayTags = computed(() => {
       // Otherwise return as-is (it's already a name)
       return tag
     })
-    .filter((tag): tag is string => tag !== null) // Filter out unresolved UUIDs
-  
+    .filter((tag: string | null): tag is string => tag !== null) // Filter out unresolved UUIDs
+
   // Deduplicate (case-insensitive)
   const seen = new Set<string>()
-  return resolved.filter(tag => {
+  return resolved.filter((tag: string) => {
     const lower = tag.toLowerCase()
     if (seen.has(lower)) return false
     seen.add(lower)
@@ -2020,6 +2020,7 @@ const messagesWithTags = computed(() => {
 const inlineComments = computed(() => {
   interface InlineComment {
     id: string
+    selection_id: string
     content: string
     author_id: string
     created_at: string
@@ -2047,6 +2048,7 @@ const inlineComments = computed(() => {
     for (const comment of data.comments) {
       const inlineComment: InlineComment = {
         id: comment.id,
+        selection_id: sel.id,
         content: comment.content,
         author_id: comment.author_id,
         created_at: comment.created_at,
@@ -2318,8 +2320,8 @@ const marginAnnotations = computed<MarginAnnotation[]>(() => {
         }
       })
       
-      // Find direct replies to this comment
-      const directReplies = data.comments.filter(c => c.parent_id === comment.id)
+      // Find direct replies to this comment (data is guaranteed non-null by the guard above)
+      const directReplies = data!.comments.filter(c => c.parent_id === comment.id)
       if (directReplies.length === 0) return
       
       // For depth 0 (root comments): show 1 reply, collapse rest
