@@ -12,6 +12,8 @@
     "resolveJsonModule": true,
     "outDir": "./dist",
     "rootDir": "./src",
+    "noUnusedLocals": false,
+    "noImplicitAny": false,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true
