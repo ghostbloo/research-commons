@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EventStore } from '../storage/event-store.js';
-import { Folder, FolderVisibility } from '../types/folder.js';
+import { Folder, FolderVisibility } from '@anima-labs/research-commons-shared';
 
 /**
  * Manages folders (event-sourced)

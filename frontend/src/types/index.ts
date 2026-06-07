@@ -1,124 +1,34 @@
-// Matches backend types
+// Frontend-facing domain types, derived from the canonical Zod schemas in the shared
+// workspace package (@anima-labs/research-commons-shared) — the single source of truth.
+//
+// The schemas infer Date-typed fields, but over the API those arrive as JSON strings, so we
+// apply Serialized<> (Date -> string, recursively). This replaces the hand-mirrored copies
+// that used to live here. See issue #2.
+import type {
+  Serialized,
+  User as UserDTO,
+  ContentBlock as ContentBlockDTO,
+  ModelInfo as ModelInfoDTO,
+  Message as MessageDTO,
+  Submission as SubmissionDTO,
+  Selection as SelectionDTO,
+  Comment as CommentDTO,
+  Rating as RatingDTO,
+  Topic as TopicDTO,
+} from '@anima-labs/research-commons-shared'
+
+// Pure string-union types need no serialization; re-export them as-is.
+export type { Visibility, SubmissionType } from '@anima-labs/research-commons-shared'
+
 export * from './ontology'
 export * from './ranking'
 
-export interface User {
-  id: string
-  email: string
-  name: string
-  roles: ('viewer' | 'contributor' | 'rater' | 'expert' | 'researcher' | 'agent' | 'admin')[]
-}
-
-export interface ContentBlock {
-  type: 'text' | 'image' | 'thinking'
-  text?: string
-  // Image blocks carry mime_type/data at the top level (matches backend ImageContentBlockSchema)
-  mime_type?: string
-  data?: string
-  image?: { mime_type: string; data: string }
-  thinking?: { content: string; signature?: string }
-}
-
-export interface ModelInfo {
-  model_id: string
-  provider: string
-  reasoning_enabled: boolean
-  max_tokens?: number
-  provider_metadata?: Record<string, unknown>
-}
-
-export interface Message {
-  id: string
-  submission_id: string
-  parent_message_id: string | null
-  order: number
-  participant_name: string
-  participant_type: 'human' | 'model' | 'system'
-  content_blocks: ContentBlock[]
-  model_info?: ModelInfo
-  timestamp?: string
-  metadata?: Record<string, any> // Discord message ID, avatar URL, etc.
-  hidden_from_models?: boolean // Message excluded from AI model context
-}
-
-export type Visibility = 'public' | 'unlisted' | 'researcher' | 'private'
-
-// Submission types - conversation is default, document is single-message, loom is branched
-export type SubmissionType = 'conversation' | 'document' | 'loom'
-
-export interface Submission {
-  id: string
-  title: string
-  submitter_id: string
-  submission_type?: SubmissionType // defaults to 'conversation'
-  source_type: 'arc-certified' | 'json-upload' | 'discord' | 'other'
-  visibility?: Visibility
-  certification_data?: {
-    arc_conversation_id?: string
-    signature_hash?: string
-    verified_at?: string
-  }
-  metadata: {
-    original_date?: string
-    participants_summary?: string[]
-    model_summary?: string[]
-    tags?: string[]
-    description?: string
-    message_count?: number
-  }
-  submitted_at: string
-}
-
-export interface Selection {
-  id: string
-  submission_id: string
-  created_by: string
-  start_message_id: string
-  start_offset?: number
-  end_message_id: string
-  end_offset?: number
-  selected_text?: string
-  label?: string
-  annotation_tags: string[]  // Tag IDs
-  tag_attributions?: Array<{
-    tag_id: string
-    tagged_by: string
-    tagged_at: Date
-  }>
-  created_at: string
-}
-
-export interface Comment {
-  id: string
-  selection_id: string  // Always on selection
-  author_id: string
-  parent_id?: string
-  content: string
-  created_at: string
-  updated_at?: string
-  // Generic target fields used by some annotation views
-  target_type?: string
-  target_id?: string
-}
-
-export interface Rating {
-  id: string
-  submission_id: string  // Always on submission
-  rater_id: string
-  criterion_id: string
-  score: number
-  created_at: string
-  updated_at?: string
-  target_id?: string
-}
-
-export interface Topic {
-  id: string
-  name: string
-  description: string
-  default_ontologies: string[]
-  default_ranking_systems: string[]
-  created_by: string
-  created_at: string
-}
-
+export type User = Serialized<UserDTO>
+export type ContentBlock = Serialized<ContentBlockDTO>
+export type ModelInfo = Serialized<ModelInfoDTO>
+export type Message = Serialized<MessageDTO>
+export type Submission = Serialized<SubmissionDTO>
+export type Selection = Serialized<SelectionDTO>
+export type Comment = Serialized<CommentDTO>
+export type Rating = Serialized<RatingDTO>
+export type Topic = Serialized<TopicDTO>

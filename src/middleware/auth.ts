@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { User } from '../types/research.js';
+import { User } from '@anima-labs/research-commons-shared';
 
 // The old hardcoded fallback. It's public (it's in the git history), so any
 // token signed with it is forgeable — including admin tokens. We refuse to use

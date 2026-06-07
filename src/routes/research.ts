@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { AppContext } from '../index.js';
 import { authenticateToken, AuthRequest, requireRole } from '../middleware/auth.js';
-import { CreateTopicRequestSchema, CreateCriterionRequestSchema, Topic } from '../types/research.js';
+import { CreateTopicRequestSchema, CreateCriterionRequestSchema, Topic } from '@anima-labs/research-commons-shared';
 
 export function createResearchRoutes(context: AppContext): Router {
   const router = Router();

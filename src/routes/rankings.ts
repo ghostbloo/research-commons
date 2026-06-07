@@ -5,7 +5,7 @@ import { authenticateToken, AuthRequest, requireRole } from '../middleware/auth.
 import { 
   CreateRankingSystemRequestSchema, 
   AttachRankingSystemRequestSchema
-} from '../types/ranking.js';
+} from '@anima-labs/research-commons-shared';
 
 export function createRankingRoutes(context: AppContext): Router {
   const router = Router();

@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
 import { AppContext } from '../index.js';
 import { authenticateToken, AuthRequest, JWT_SECRET } from '../middleware/auth.js';
-import { CreateSubmissionRequestSchema, Message } from '../types/submission.js';
+import { CreateSubmissionRequestSchema, Message } from '@anima-labs/research-commons-shared';
 
 export function createSubmissionRoutes(context: AppContext): Router {
   const router = Router();

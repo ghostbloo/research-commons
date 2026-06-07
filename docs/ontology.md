@@ -39,11 +39,12 @@ remove their own vote.
 
 ## Entities
 
-Defined as Zod schemas in `src/types/`, mirrored on the frontend in
-`frontend/src/types/`. See those files for exact fields; the notes below capture
-the parts that aren't obvious from the names.
+Defined once as Zod schemas in the `shared/` workspace package (`shared/src/`),
+consumed by both backend and frontend (the frontend derives its types from the
+same schemas — see issue #2 and root `CLAUDE.md`). See those files for exact
+fields; the notes below capture the parts that aren't obvious from the names.
 
-`src/types/ontology.ts`
+`shared/src/ontology.ts`
 - **AnnotationOntology** — a typology. `category` is
   `model-behavior | interviewer-quality | custom`; `permissions` is
   `public | expert-only` (who may apply it).
@@ -54,7 +55,7 @@ the parts that aren't obvious from the names.
   `anyone | expert-only | researcher-only`; `is_default` means auto-attached
   from the submission's topic.
 
-`src/types/annotation.ts`
+`shared/src/annotation.ts`
 - **Selection** — a text range (`start/end_message_id` + offsets). Carries
   `annotation_tags` (tag IDs) and an optional legacy freeform `label`; tagging
   via the `selection_tags` vote table is the primary path.
@@ -64,7 +65,7 @@ the parts that aren't obvious from the names.
 - **Rating** — targets `submission_id` (not a selection), scored against a
   `criterion_id`. One rating per `(rater_id, submission_id, criterion_id)`.
 
-`src/types/research.ts`
+`shared/src/research.ts`
 - **Topic** — has `default_ontologies` and `default_ranking_systems`,
   auto-attached to submissions in the topic.
 

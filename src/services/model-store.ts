@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EventStore } from '../storage/event-store.js';
-import { Model } from '../types/model.js';
+import { Model } from '@anima-labs/research-commons-shared';
 
 /**
  * Manages model registry (event-sourced)

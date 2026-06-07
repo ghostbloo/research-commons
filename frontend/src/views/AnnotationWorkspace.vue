@@ -775,7 +775,7 @@ const messageSelections = computed(() => {
 const selectionData = ref<Map<string, {
   comments: Comment[]
   tags: any[]
-  tagAttributions: Array<{ tag_id: string; tagged_by: string; tagged_at: Date }>
+  tagAttributions: Array<{ tag_id: string; tagged_by: string; tagged_at: string }>
 }>>(new Map())
 const submissionRatings = ref<Rating[]>([])
 const attachedOntologies = ref<any[]>([])
@@ -1402,8 +1402,8 @@ function exportAsMultiuserJson() {
         } else if (block.type === 'image') {
           return { 
             type: 'image', 
-            mime_type: block.image?.mime_type || 'image/png',
-            data: block.image?.data || '' // Include base64 data
+            mime_type: block.mime_type || 'image/png',
+            data: block.data || '' // Include base64 data
           }
         }
         return block
@@ -1741,7 +1741,7 @@ async function handleTagToggled(tagId: string, shouldSelect: boolean) {
   if (!activeMessageId.value) return
   const currentUserId = authStore.user?.id
   let previousTagIdsSnapshot: Set<string> | null = null
-  let previousRecordSnapshot: { comments: Comment[]; tags: any[]; tagAttributions: Array<{ tag_id: string; tagged_by: string; tagged_at: Date }> } | null = null
+  let previousRecordSnapshot: { comments: Comment[]; tags: any[]; tagAttributions: Array<{ tag_id: string; tagged_by: string; tagged_at: string }> } | null = null
   let targetSelectionId: string | null = null
 
   try {
@@ -1802,14 +1802,14 @@ async function handleTagToggled(tagId: string, shouldSelect: boolean) {
     const updatedSelection = response.data.selections.find(s => s.id === selection!.id)
 
     let selTags: string[]
-    let selAttributions: Array<{ tag_id: string; tagged_by: string; tagged_at: Date }>
+    let selAttributions: Array<{ tag_id: string; tagged_by: string; tagged_at: string }>
 
     if (updatedSelection) {
       selTags = updatedSelection.annotation_tags || []
       selAttributions = (updatedSelection.tag_attributions || []).map(attr => ({
         tag_id: attr.tag_id,
         tagged_by: attr.tagged_by,
-        tagged_at: new Date(attr.tagged_at)
+        tagged_at: attr.tagged_at
       }))
     } else {
       selTags = Array.from(tagSet)
@@ -1819,7 +1819,7 @@ async function handleTagToggled(tagId: string, shouldSelect: boolean) {
           existingAttrs.push({
             tag_id: tagId,
             tagged_by: currentUserId,
-            tagged_at: new Date()
+            tagged_at: new Date().toISOString()
           })
         } else {
           const idx = existingAttrs.findIndex(a => a.tag_id === tagId && a.tagged_by === currentUserId)

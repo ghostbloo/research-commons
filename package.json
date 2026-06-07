@@ -3,18 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "workspaces": [
+    "shared",
+    "frontend"
+  ],
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "build:full": "tsc && cd frontend && npm run build",
-    "build:backend": "tsc",
-    "build:frontend": "cd frontend && npm run build",
+    "dev": "npm run build:shared && tsx watch src/index.ts",
+    "build": "npm run build:shared && tsc",
+    "build:shared": "npm run build -w shared",
+    "build:full": "npm run build:shared && tsc && npm run build -w frontend",
+    "build:backend": "npm run build:shared && tsc",
+    "build:frontend": "npm run build:shared && npm run build -w frontend",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "typecheck": "npm run build:shared && tsc --noEmit",
+    "test": "npm run build:shared && vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@anima-labs/research-commons-shared": "*",
     "@types/compression": "^1.8.1",
     "bcrypt": "^5.1.1",
     "better-sqlite3": "^11.0.0",

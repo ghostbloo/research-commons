@@ -13,6 +13,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@anima-labs/research-commons-shared": "*",
     "@tailwindcss/typography": "^0.5.19",
     "axios": "^1.6.0",
     "marked": "^17.0.0",

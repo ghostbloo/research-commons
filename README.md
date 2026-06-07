@@ -326,7 +326,7 @@ Submissions contain a tree of messages (branching chat conversations).
 Researchers create selections (text ranges) and comment on them, and rate whole
 submissions against criteria.
 
-See `src/types/` for detailed schemas.
+See `shared/src/` for detailed schemas.
 
 ## Development
 

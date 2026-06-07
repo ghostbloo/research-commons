@@ -1,31 +1,11 @@
-export interface Criterion {
-  id: string
-  ranking_system_id: string
-  name: string
-  description: string
-  scale_type: 'numeric' | 'boolean' | 'likert'
-  scale_min?: number
-  scale_max?: number
-  scale_labels?: string[]
-}
+// Derived from the canonical Zod schemas in @anima-labs/research-commons-shared (issue #2).
+import type {
+  Serialized,
+  Criterion as CriterionDTO,
+  RankingSystem as RankingSystemDTO,
+  SubmissionRankingSystem as SubmissionRankingSystemDTO,
+} from '@anima-labs/research-commons-shared'
 
-export interface RankingSystem {
-  id: string
-  name: string
-  description: string
-  category: 'interviewer-quality' | 'model-behavior' | 'custom'
-  created_by: string
-  created_at: string
-  permissions: 'public' | 'expert-only'
-}
-
-export interface SubmissionRankingSystem {
-  id: string
-  submission_id: string
-  ranking_system_id: string
-  attached_by: string
-  attached_at: string
-  usage_permissions: 'anyone' | 'expert-only' | 'researcher-only'
-  is_from_topic: boolean
-}
-
+export type Criterion = Serialized<CriterionDTO>
+export type RankingSystem = Serialized<RankingSystemDTO>
+export type SubmissionRankingSystem = Serialized<SubmissionRankingSystemDTO>

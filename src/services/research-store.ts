@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EventStore } from '../storage/event-store.js';
-import { Topic } from '../types/research.js';
-import { Criterion } from '../types/ranking.js';
+import { Topic } from '@anima-labs/research-commons-shared';
+import { Criterion } from '@anima-labs/research-commons-shared';
 
 /**
  * Manages topics and criteria (event-sourced)

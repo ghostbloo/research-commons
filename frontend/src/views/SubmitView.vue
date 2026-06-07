@@ -653,7 +653,7 @@ Supports Markdown formatting:
                 <div class="shrink-0">
                   <img
                     v-if="msg.metadata?.avatar_url"
-                    :src="msg.metadata.avatar_url"
+                    :src="msg.metadata.avatar_url as string"
                     class="w-6 h-6 rounded-full"
                     :alt="msg.participant_name"
                   />
@@ -680,7 +680,7 @@ Supports Markdown formatting:
                 <div class="shrink-0">
                   <img
                     v-if="msg.metadata?.avatar_url"
-                    :src="msg.metadata.avatar_url"
+                    :src="msg.metadata.avatar_url as string"
                     class="w-6 h-6 rounded-full"
                     :alt="msg.participant_name"
                   />

@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ShardedEventStore, EventStore, Event } from './event-store.js';
-import { Submission, Message, Visibility } from '../types/submission.js';
-import { Rating } from '../types/annotation.js';
+import { Submission, Message, Visibility } from '@anima-labs/research-commons-shared';
+import { Rating } from '@anima-labs/research-commons-shared';
 
 /**
  * Manages submission data stored as events

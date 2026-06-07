@@ -1,5 +1,5 @@
 import { BaseImporter, ImportSource, ImportedConversation } from './base-importer.js';
-import type { Message } from '../types/submission.js';
+import type { Message } from '@anima-labs/research-commons-shared';
 import { v4 as uuidv4 } from 'uuid';
 
 interface DiscordMessage {

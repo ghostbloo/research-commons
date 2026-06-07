@@ -2,9 +2,9 @@ import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Selection, Comment, Rating } from '../types/annotation.js';
-import { SubmissionOntology } from '../types/ontology.js';
-import { SubmissionRankingSystem } from '../types/ranking.js';
+import { Selection, Comment, Rating } from '@anima-labs/research-commons-shared';
+import { SubmissionOntology } from '@anima-labs/research-commons-shared';
+import { SubmissionRankingSystem } from '@anima-labs/research-commons-shared';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

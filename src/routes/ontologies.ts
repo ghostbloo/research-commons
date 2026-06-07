@@ -6,7 +6,7 @@ import {
   CreateOntologyRequestSchema, 
   AttachOntologyRequestSchema,
   ApplyTagsRequestSchema 
-} from '../types/ontology.js';
+} from '@anima-labs/research-commons-shared';
 
 export function createOntologyRoutes(context: AppContext): Router {
   const router = Router();

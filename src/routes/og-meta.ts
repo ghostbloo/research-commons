@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import sharp from 'sharp';
 import { AppContext } from '../index.js';
-import type { Message } from '../types/submission.js';
+import type { Message } from '@anima-labs/research-commons-shared';
 
 // User agents for social media crawlers and OG validators
 const CRAWLER_USER_AGENTS = [

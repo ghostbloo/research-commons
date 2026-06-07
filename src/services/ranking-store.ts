@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { EventStore } from '../storage/event-store.js';
-import { RankingSystem, Criterion } from '../types/ranking.js';
+import { RankingSystem, Criterion } from '@anima-labs/research-commons-shared';
 
 /**
  * Manages ranking systems and criteria (event-sourced)
