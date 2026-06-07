@@ -76,6 +76,7 @@ gh api --method POST repos/<owner>/<repo>/issues/<n>/dependencies/blocked_by -F 
 ## Docs map
 
 - `docs/ontology.md` — annotation/ranking domain model (maintained, reconciled against code). Start here for annotation work.
+- `docs/railway.md` — maintained Railway deployment notes and the current load-bearing Railway config.
 - `README.md` — project overview, full env-var reference, API examples.
 - `REQUIREMENTS.md` — design spec + product philosophy. Aspirational; not everything described is built.
-- Root `*_DEPLOY*.md` / `DEPLOYMENT.md` / `RANKING_SYSTEM_REFACTOR.md` / `TESTING.md` — older write-once snapshots; treat as historical, not authoritative.
+- `RANKING_SYSTEM_REFACTOR.md` / `TESTING.md` — older write-once snapshots; treat as historical, not authoritative.

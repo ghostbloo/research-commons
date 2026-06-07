@@ -145,6 +145,12 @@ npm start
 
 Server will start on `http://localhost:3020`
 
+## Deployment
+
+The maintained Railway deployment notes live in `docs/railway.md`. The active
+Railway descriptor is `railway.toml`, which builds with nixpacks and starts the
+server with `npm start`.
+
 ## API Overview
 
 ### Authentication
