@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ShardedEventStore, EventStore, Event } from './event-store.js';
 import { Submission, Message, Visibility } from '../types/submission.js';
-import { Rating } from '../types/annotation.js';
 
 /**
  * Manages submission data stored as events
@@ -9,8 +8,7 @@ import { Rating } from '../types/annotation.js';
  * Per submission:
  *   metadata.jsonl - submission metadata
  *   messages.jsonl - all messages in tree
- *   ratings.jsonl - ratings on this submission
- * 
+ *
  * Global:
  *   index.jsonl - index of all submission IDs for listing
  */
@@ -21,7 +19,6 @@ export class SubmissionStore {
   // In-memory caches (load on demand, unload inactive)
   private submissions: Map<string, Submission> = new Map();
   private messages: Map<string, Map<string, Message>> = new Map(); // submissionId -> messageId -> Message
-  private ratings: Map<string, Rating[]> = new Map(); // submissionId -> ratings
   private lastAccessed: Map<string, Date> = new Map();
   private submissionIndex: Set<string> = new Set(); // All submission IDs
 
@@ -98,7 +95,6 @@ export class SubmissionStore {
     this.submissions.set(submission.id, submission);
     const messageMap = new Map(messages.map(m => [m.id, m]));
     this.messages.set(submission.id, messageMap);
-    this.ratings.set(submission.id, []);
     this.lastAccessed.set(submission.id, new Date());
 
     return submission;
@@ -283,9 +279,6 @@ export class SubmissionStore {
     }
   }
 
-  // Note: Ratings no longer stored in event store - moved to SQLite
-  // These methods are kept for backward compatibility but deprecated
-
   /**
    * Unload inactive submissions from memory
    */
@@ -297,7 +290,6 @@ export class SubmissionStore {
       if (now.getTime() - lastAccess.getTime() > maxAgeMs) {
         this.submissions.delete(id);
         this.messages.delete(id);
-        this.ratings.delete(id);
         this.lastAccessed.delete(id);
         unloaded++;
       }
