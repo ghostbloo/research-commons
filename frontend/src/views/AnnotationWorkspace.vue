@@ -455,176 +455,24 @@
     />
 
     <!-- Stats Detail Modal -->
-    <div
-      v-if="showStatsDetail"
-      class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center p-4 z-50"
-      @click.self="showStatsDetail = false"
-    >
-      <div class="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col transition-colors">
-        <!-- Header -->
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Annotation Statistics</h2>
-          <button
-            @click="showStatsDetail = false"
-            class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none transition-colors"
-          >
-            ✕
-          </button>
-        </div>
-
-        <!-- Content -->
-        <div class="flex-1 overflow-y-auto p-6 space-y-6">
-          <!-- Rating Stats Detail -->
-          <div v-if="ratingStats.length > 0">
-            <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3">⭐ Rating Breakdown</h3>
-            <div class="space-y-4">
-              <div
-                v-for="stat in ratingStats"
-                :key="stat.criterion_id"
-                class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700 transition-colors"
-              >
-                <div class="flex items-baseline justify-between mb-2">
-                  <span class="font-medium text-gray-900 dark:text-gray-100">{{ stat.criterion_name }}</span>
-                  <span class="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                    {{ stat.avg.toFixed(1) }}/{{ stat.max }}
-                  </span>
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  {{ stat.count }} rating(s) • Range: {{ Math.min(...stat.scores) }}–{{ Math.max(...stat.scores) }}
-                </div>
-                <!-- Simple histogram -->
-                <div class="flex gap-1 h-12 items-end">
-                  <div
-                    v-for="score in Array.from({ length: stat.max + 1 }, (_, i) => i)"
-                    :key="score"
-                    class="flex-1 bg-indigo-200 dark:bg-indigo-700 rounded-t transition-colors"
-                    :style="{ 
-                      height: (stat.scores.filter(s => s === score).length / stat.count * 100) + '%',
-                      minHeight: stat.scores.filter(s => s === score).length > 0 ? '4px' : '0'
-                    }"
-                    :title="`${score}: ${stat.scores.filter(s => s === score).length} rating(s)`"
-                  ></div>
-                </div>
-                <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  <span>0</span>
-                  <span>{{ stat.max }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tag Stats Detail -->
-          <div v-if="tagStats.length > 0">
-            <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-3">🏷️ Tag Usage</h3>
-            <div class="grid grid-cols-2 gap-3">
-              <div
-                v-for="stat in tagStats"
-                :key="stat.tag_id"
-                class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 flex items-center justify-between border border-gray-200 dark:border-gray-700 transition-colors"
-              >
-                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">{{ stat.tag_name }}</span>
-                <span class="text-lg font-bold text-gray-600 dark:text-gray-400">{{ stat.count }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Empty state -->
-          <div v-if="ratingStats.length === 0 && tagStats.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
-            No statistics available yet.
-          </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800 flex justify-end">
-          <button
-            @click="showStatsDetail = false"
-            class="px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+    <StatsDetailModal
+      :show="showStatsDetail"
+      :rating-stats="ratingStats"
+      :tag-stats="tagStats"
+      @close="showStatsDetail = false"
+    />
 
     <!-- Folder Picker Modal -->
-    <div
-      v-if="showFolderPicker"
-      class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
-      @click.self="showFolderPicker = false"
-    >
-      <div class="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-sm w-full border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Folders</h3>
-        </div>
-
-        <div v-if="folderPickerLoading" class="px-5 py-8 text-center text-sm text-gray-500">Loading...</div>
-
-        <template v-else>
-          <!-- Current folders -->
-          <div v-if="folderPickerCurrentFolders.length > 0">
-            <div class="px-5 pt-3 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">In folders</div>
-            <div class="max-h-32 overflow-y-auto">
-              <div
-                v-for="folder in folderPickerCurrentFolders"
-                :key="folder.id"
-                class="px-5 py-2.5 flex items-center gap-3 group"
-              >
-                <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/>
-                </svg>
-                <router-link
-                  :to="`/folders/${folder.id}`"
-                  @click="showFolderPicker = false"
-                  class="flex-1 min-w-0 text-sm text-gray-900 dark:text-gray-100 hover:text-indigo-500 dark:hover:text-indigo-400 truncate transition-colors"
-                >
-                  {{ folder.name }}
-                </router-link>
-                <button
-                  @click="removeFromFolder(folder.id)"
-                  class="opacity-0 group-hover:opacity-100 text-xs text-gray-400 hover:text-red-400 transition-all shrink-0"
-                  title="Remove from folder"
-                >
-                  &times;
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Available folders to add -->
-          <div v-if="folderPickerAvailable.length > 0">
-            <div class="px-5 pt-3 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider border-t border-gray-100 dark:border-gray-800">Add to folder</div>
-            <div class="max-h-32 overflow-y-auto">
-              <button
-                v-for="folder in folderPickerAvailable"
-                :key="folder.id"
-                @click="addToFolder(folder.id)"
-                class="w-full px-5 py-2.5 text-left hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-3"
-              >
-                <svg class="w-4 h-4 text-gray-300 dark:text-gray-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                <span class="text-sm text-gray-600 dark:text-gray-400 truncate">{{ folder.name }}</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Empty state -->
-          <div v-if="folderPickerFolders.length === 0" class="px-5 py-8 text-center text-sm text-gray-500">
-            No folders yet.
-            <router-link to="/folders" @click="showFolderPicker = false" class="text-indigo-500 hover:underline block mt-2">Create one</router-link>
-          </div>
-        </template>
-
-        <div class="px-5 py-3 border-t border-gray-200 dark:border-gray-700 flex justify-end">
-          <button
-            @click="showFolderPicker = false"
-            class="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
+    <FolderPickerModal
+      :show="showFolderPicker"
+      :loading="folderPickerLoading"
+      :current-folders="folderPickerCurrentFolders"
+      :available-folders="folderPickerAvailable"
+      :all-folders="folderPickerFolders"
+      @close="showFolderPicker = false"
+      @add-to-folder="addToFolder"
+      @remove-from-folder="removeFromFolder"
+    />
 
     <!-- Tag Popover (inline tag selection) -->
     <TagPopover
@@ -707,10 +555,18 @@ import TagPopover from '@/components/TagPopover.vue'
 import CommentInput from '@/components/CommentInput.vue'
 import TopicSelector from '@/components/TopicSelector.vue'
 import RatingForm from '@/components/RatingForm.vue'
-import type { Message, Selection, Comment, Rating, Topic } from '@/types'
-import type { MarginAnnotation, VerticalBar } from '@/utils/layout-manager'
-import { ontologiesAPI, submissionsAPI, annotationsAPI, researchAPI, rankingsAPI, authAPI, foldersAPI, type Folder } from '@/services/api'
+import StatsDetailModal from '@/components/StatsDetailModal.vue'
+import FolderPickerModal from '@/components/FolderPickerModal.vue'
+import type { Message, Selection, Comment } from '@/types'
+import { ontologiesAPI, submissionsAPI, annotationsAPI, researchAPI, rankingsAPI, authAPI } from '@/services/api'
 import { renderMarkdown } from '@/utils/markdown'
+import { useExport } from '@/composables/useExport'
+import { usePermissions } from '@/composables/usePermissions'
+import { useSubmissionMetadata } from '@/composables/useSubmissionMetadata'
+import { useFolderManager } from '@/composables/useFolderManager'
+import { useSelectionState } from '@/composables/useSelectionState'
+import { useRatingState } from '@/composables/useRatingState'
+import { useMessageActions } from '@/composables/useMessageActions'
 
 const route = useRoute()
 const router = useRouter()
@@ -719,15 +575,43 @@ const submissionsStore = useSubmissionsStore()
 
 const submissionId = route.params.id as string
 const loading = ref(true)
-const loadingPinnedMessage = ref(false)
 const isMobile = ref(window.innerWidth < 1024)
 
 const submission = ref()
 const messages = ref<Message[]>([])
-const selections = ref<Selection[]>([])
-const pinnedMessageId = ref<string | null>(null)
-const hiddenMessageIds = ref<Set<string>>(new Set())
-const messageReactions = ref<Map<string, Array<{ user_id: string; reaction_type: string }>>>(new Map())
+
+// Submission-scoped lookup maps (loaded in loadData, consumed by composables/computeds)
+const attachedOntologies = ref<any[]>([])
+const allOntologies = ref<Map<string, any>>(new Map())
+const allTags = ref<Map<string, any>>(new Map())
+const attachedRankingSystems = ref<any[]>([])
+const allCriteria = ref<Map<string, any>>(new Map())
+const rankingSystemDetails = ref<Map<string, any>>(new Map())
+const submitterName = ref('User')
+const userNames = ref<Map<string, string>>(new Map())
+
+// Header measurement (used by scroll helpers + content padding)
+const headerEl = ref<HTMLElement | null>(null)
+const headerHeight = ref(0)
+
+// Submission metadata inline editing (title / description / topics)
+const {
+  editingTitle,
+  titleEdit,
+  titleInput,
+  editingDescription,
+  descriptionEdit,
+  descriptionTextarea,
+  showTopicSelector,
+  availableTopics,
+  startEditTitle,
+  saveTitle,
+  cancelEditTitle,
+  startEditDescription,
+  saveDescription,
+  cancelEditDescription,
+  applyTopics
+} = useSubmissionMetadata(submission, submissionId)
 
 // Build participant avatars map from message metadata
 const participantAvatars = computed(() => {
@@ -741,66 +625,13 @@ const participantAvatars = computed(() => {
   return avatars
 })
 
-// Build selection highlights map for each message
-const messageSelections = computed(() => {
-  const selectionsMap = new Map<string, Array<{
-    id: string
-    start_offset: number
-    end_offset: number
-    label?: string
-    hasComments: boolean
-    hasTags: boolean
-  }>>()
-  
-  for (const sel of selections.value) {
-    const messageId = sel.start_message_id
-    if (!selectionsMap.has(messageId)) {
-      selectionsMap.set(messageId, [])
-    }
-    
-    const data = selectionData.value.get(sel.id)
-    selectionsMap.get(messageId)!.push({
-      id: sel.id,
-      start_offset: sel.start_offset ?? 0,
-      end_offset: sel.end_offset ?? 0,
-      label: sel.label,
-      hasComments: (data?.comments?.length ?? 0) > 0,
-      hasTags: (data?.tags?.length ?? 0) > 0
-    })
-  }
-  
-  return selectionsMap
-})
-
-const selectionData = ref<Map<string, {
-  comments: Comment[]
-  tags: any[]
-  tagAttributions: Array<{ tag_id: string; tagged_by: string; tagged_at: Date }>
-}>>(new Map())
-const submissionRatings = ref<Rating[]>([])
-const attachedOntologies = ref<any[]>([])
-const allOntologies = ref<Map<string, any>>(new Map())
-const allTags = ref<Map<string, any>>(new Map())
-const submitterName = ref('User')
-const submissionComments = ref<Comment[]>([])
-const userNames = ref<Map<string, string>>(new Map())
-
-const editingDescription = ref(false)
-const descriptionEdit = ref('')
-const descriptionTextarea = ref<HTMLTextAreaElement>()
-const editingTitle = ref(false)
-const titleEdit = ref('')
-const titleInput = ref<HTMLInputElement>()
-const showTopicSelector = ref(false)
-const availableTopics = ref<Topic[]>([])
-
 // Resolve tag IDs to names, filter out raw UUIDs that can't be resolved, deduplicate
 const displayTags = computed(() => {
   const tags = submission.value?.metadata.tags || []
   const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  
+
   const resolved = tags
-    .map((tag: string) => {
+    .map(tag => {
       // If it's a UUID, try to find the topic name
       if (uuidPattern.test(tag)) {
         const topic = availableTopics.value.find(t => t.id === tag)
@@ -809,11 +640,11 @@ const displayTags = computed(() => {
       // Otherwise return as-is (it's already a name)
       return tag
     })
-    .filter((tag: string | null): tag is string => tag !== null) // Filter out unresolved UUIDs
+    .filter((tag): tag is string => tag !== null) // Filter out unresolved UUIDs
 
   // Deduplicate (case-insensitive)
   const seen = new Set<string>()
-  return resolved.filter((tag: string) => {
+  return resolved.filter(tag => {
     const lower = tag.toLowerCase()
     if (seen.has(lower)) return false
     seen.add(lower)
@@ -821,86 +652,86 @@ const displayTags = computed(() => {
   })
 })
 
-const canEditSubmission = computed(() => {
-  if (!authStore.user || !submission.value) return false
-  return submission.value.submitter_id === authStore.user.id || 
-         authStore.user.roles.includes('researcher') ||
-         authStore.user.roles.includes('admin')
-})
-
-const canDeleteSubmission = computed(() => {
-  if (!authStore.user || !submission.value) return false
-  return submission.value.submitter_id === authStore.user.id || 
-         authStore.user.roles.includes('admin')
-})
-
-// Researchers and admins can export conversations
-const canExport = computed(() => {
-  if (!authStore.user) return false
-  return authStore.user.roles.includes('researcher') || 
-         authStore.user.roles.includes('admin')
-})
+// Permission computeds (owner / role based)
+const {
+  canEditSubmission,
+  canDeleteSubmission,
+  canExport,
+  canHideMessages,
+  canViewHiddenMessages,
+  canToggleHiddenFromModels,
+  canPin
+} = usePermissions(authStore, submission)
 
 // Document mode: single-message submissions displayed as readable documents
 const isDocumentMode = computed(() => {
   return submission.value?.submission_type === 'document'
 })
 
-// Permission to hide messages (owner or admin only)
-const canHideMessages = computed(() => {
-  if (!authStore.user || !submission.value) return false
-  return submission.value.submitter_id === authStore.user.id ||
-         authStore.user.roles.includes('admin')
-})
+// Selection hub: selections + per-selection data cache + derived annotation computeds
+const {
+  selections,
+  selectionData,
+  messageSelections,
+  annotatedMessageIds,
+  totalCommentCount,
+  messagesWithComments,
+  messagesWithTags,
+  inlineComments,
+  tagStats,
+  verticalBars,
+  marginAnnotations,
+  handleExpandReplies,
+  handleExpandTopLevel,
+  handleDeleteSelection,
+  handleDeleteComment,
+  handleEditComment
+} = useSelectionState(messages, allTags)
 
-// Permission to view hidden messages (researchers can see what's hidden, but not hide)
-// Owners can also see individual hidden messages so they can manage them
-const canViewHiddenMessages = computed(() => {
-  if (!authStore.user || !submission.value) return false
-  
-  // Check if user is researcher, admin, or the submission owner
-  const isOwner = submission.value.submitter_id === authStore.user.id
-  const isResearcher = authStore.user.roles.includes('researcher')
-  const isAdmin = authStore.user.roles.includes('admin')
-  
-  return isOwner || isResearcher || isAdmin
-})
+// Submission-level ratings + aggregates
+const {
+  systemRatingAverages,
+  ratingStats,
+  currentUserRatings,
+  criterionAggregates,
+  loadRatings,
+  submitRatings
+} = useRatingState(submissionId, authStore, submissionsStore, allCriteria, rankingSystemDetails)
 
-// Permission to toggle hidden_from_models (admins and submission owners only)
-const canToggleHiddenFromModels = computed(() => {
-  if (!authStore.user || !submission.value) return false
-  return submission.value.submitter_id === authStore.user.id ||
-         authStore.user.roles.includes('admin')
-})
+// Message-level actions (pin / hide / reactions / monospace / scroll)
+const {
+  pinnedMessageId,
+  hiddenMessageIds,
+  messageReactions,
+  loadingPinnedMessage,
+  handleTogglePin,
+  handleToggleHide,
+  handleHideAllPrevious,
+  handleToggleHiddenFromModels,
+  handleToggleMonospace,
+  scrollToMessage,
+  scrollToPinnedMessage,
+  handleToggleReaction
+} = useMessageActions(submissionId, authStore, submissionsStore, messages, submission, headerHeight)
 
-const canPin = computed(() => {
-  if (!authStore.user || !submission.value) return false
-  return submission.value.submitter_id === authStore.user.id ||
-         authStore.user.roles.includes('admin') ||
-         authStore.user.roles.includes('researcher')
-})
+// Folder picker (add/remove submission to folders)
+const {
+  showFolderPicker,
+  folderPickerLoading,
+  folderPickerFolders,
+  submissionFolderCount,
+  folderPickerCurrentFolders,
+  folderPickerAvailable,
+  loadSubmissionFolderCount,
+  openFolderPicker,
+  addToFolder,
+  removeFromFolder
+} = useFolderManager(submissionId, authStore)
 
 const contentPaddingTop = computed(() => {
   const base = headerHeight.value + 20 // 20px extra spacing
   const toolbar = showSelectionToolbar.value ? 60 : 0
   return `${base + toolbar}px`
-})
-
-// Track which messages have annotations
-const annotatedMessageIds = computed(() => {
-  const ids = new Set<string>()
-  for (const sel of selections.value) {
-    ids.add(sel.start_message_id)
-    // If spans multiple, add all in range
-    if (sel.end_message_id !== sel.start_message_id) {
-      const startIdx = messages.value.findIndex(m => m.id === sel.start_message_id)
-      const endIdx = messages.value.findIndex(m => m.id === sel.end_message_id)
-      for (let i = startIdx; i <= endIdx && i >= 0; i++) {
-        ids.add(messages.value[i].id)
-      }
-    }
-  }
-  return ids
 })
 
 
@@ -1104,11 +935,8 @@ async function loadData() {
     }
     
     // Load submission-level ratings
-    submissionRatings.value = await submissionsStore.getRatingsBySubmission(submissionId)
-    
-    // TODO: Load submission-level comments
-    submissionComments.value = []
-    
+    await loadRatings()
+
     // Load hidden messages (for researchers/admins/owners who can see individual badges)
     if (canViewHiddenMessages.value) {
       try {
@@ -1254,356 +1082,6 @@ function handleAddCommentToMessage(messageId: string) {
   
   activeMessageId.value = messageId
   showCommentInput.value = true
-}
-
-function handleCopyMessage(messageId: string) {
-  const message = messages.value.find(m => m.id === messageId)
-  if (!message) return
-  
-  // Extract text from content blocks
-  const text = message.content_blocks
-    .filter(block => block.type === 'text')
-    .map(block => block.text || '')
-    .join('\n')
-  
-  navigator.clipboard.writeText(text)
-    .then(() => {
-      console.log('Message copied to clipboard')
-      // TODO: Show toast notification
-    })
-    .catch(err => {
-      console.error('Failed to copy message:', err)
-    })
-}
-
-// Download helper
-function downloadFile(content: string, filename: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-  showMoreMenu.value = false
-}
-
-// Export as Markdown - drops images, inlines text attachments
-function exportAsMarkdown() {
-  const title = submission.value?.title || 'Conversation'
-  const date = submission.value?.submitted_at 
-    ? new Date(submission.value.submitted_at).toISOString().split('T')[0]
-    : new Date().toISOString().split('T')[0]
-  
-  let md = `# ${title}\n\n`
-  md += `*Exported from Research Commons on ${date}*\n\n`
-  
-  if (submission.value?.metadata?.description) {
-    md += `> ${submission.value.metadata.description}\n\n`
-  }
-  
-  md += `---\n\n`
-  
-  for (const msg of messages.value) {
-    const role = msg.participant_type === 'human' ? '👤' : msg.participant_type === 'model' ? '🤖' : '⚙️'
-    const name = msg.participant_name
-    const model = msg.model_info?.model_id ? ` (${msg.model_info.model_id})` : ''
-    
-    md += `## ${role} ${name}${model}\n\n`
-    
-    for (const block of msg.content_blocks) {
-      if (block.type === 'text' && block.text) {
-        md += `${block.text}\n\n`
-      } else if (block.type === 'thinking' && block.thinking?.content) {
-        md += `<details>\n<summary>💭 Thinking</summary>\n\n${block.thinking.content}\n\n</details>\n\n`
-      } else if (block.type === 'image') {
-        md += `*[Image omitted]*\n\n`
-      }
-    }
-    
-    md += `---\n\n`
-  }
-  
-  const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${date}.md`
-  downloadFile(md, filename, 'text/markdown')
-}
-
-// Export as Standard JSON - user/assistant roles only
-function exportAsStandardJson() {
-  const title = submission.value?.title || 'Conversation'
-  const date = submission.value?.submitted_at 
-    ? new Date(submission.value.submitted_at).toISOString().split('T')[0]
-    : new Date().toISOString().split('T')[0]
-  
-  const conversation = {
-    title,
-    exported_at: new Date().toISOString(),
-    source: 'Research Commons',
-    messages: messages.value.map(msg => {
-      // Map participant_type to standard roles
-      const role = msg.participant_type === 'human' ? 'user' 
-        : msg.participant_type === 'model' ? 'assistant' 
-        : 'system'
-      
-      // Combine text blocks into content string
-      const content = msg.content_blocks
-        .filter(block => block.type === 'text')
-        .map(block => block.text || '')
-        .join('\n')
-      
-      return { role, content }
-    }).filter(msg => msg.content.trim()) // Remove empty messages
-  }
-  
-  const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${date}.json`
-  downloadFile(JSON.stringify(conversation, null, 2), filename, 'application/json')
-}
-
-// Export as Multiuser JSON - rich role metadata
-function exportAsMultiuserJson() {
-  const title = submission.value?.title || 'Conversation'
-  const date = submission.value?.submitted_at 
-    ? new Date(submission.value.submitted_at).toISOString().split('T')[0]
-    : new Date().toISOString().split('T')[0]
-  
-  const conversation = {
-    title,
-    description: submission.value?.metadata?.description || null,
-    exported_at: new Date().toISOString(),
-    source: 'Research Commons',
-    submission_id: submission.value?.id,
-    submitted_at: submission.value?.submitted_at,
-    submitter: submitterName.value,
-    tags: displayTags.value,
-    participants: [...new Set(messages.value.map(m => m.participant_name))].map(name => {
-      const sample = messages.value.find(m => m.participant_name === name)
-      return {
-        name,
-        type: sample?.participant_type || 'human',
-        model_id: sample?.model_info?.model_id || null,
-        provider: sample?.model_info?.provider || null
-      }
-    }),
-    messages: messages.value.map(msg => ({
-      id: msg.id,
-      order: msg.order,
-      participant_name: msg.participant_name,
-      participant_type: msg.participant_type,
-      model_info: msg.model_info || null,
-      timestamp: msg.timestamp || null,
-      hidden_from_models: msg.hidden_from_models || false,
-      content_blocks: msg.content_blocks.map(block => {
-        if (block.type === 'text') {
-          return { type: 'text', text: block.text }
-        } else if (block.type === 'thinking') {
-          return { type: 'thinking', content: block.thinking?.content || '' }
-        } else if (block.type === 'image') {
-          return { 
-            type: 'image', 
-            mime_type: block.image?.mime_type || 'image/png',
-            data: block.image?.data || '' // Include base64 data
-          }
-        }
-        return block
-      })
-    }))
-  }
-  
-  const filename = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_multiuser_${date}.json`
-  downloadFile(JSON.stringify(conversation, null, 2), filename, 'application/json')
-}
-
-async function handleTogglePin(messageId: string) {
-  try {
-    // If this message is already pinned, unpin it
-    if (pinnedMessageId.value === messageId) {
-      await submissionsAPI.unpinMessage(submissionId)
-      pinnedMessageId.value = null
-      console.log('Message unpinned')
-    } else {
-      // Pin this message
-      await submissionsAPI.pinMessage(submissionId, messageId)
-      pinnedMessageId.value = messageId
-      console.log('Message pinned')
-    }
-    
-    // Reload submission to get updated metadata
-    submission.value = await submissionsStore.fetchSubmission(submissionId)
-  } catch (err) {
-    console.error('Failed to toggle pin:', err)
-  }
-}
-
-async function handleToggleHide(messageId: string) {
-  try {
-    // If message is hidden, unhide it
-    if (hiddenMessageIds.value.has(messageId)) {
-      await submissionsAPI.unhideMessage(submissionId, messageId)
-      hiddenMessageIds.value.delete(messageId)
-    } else {
-      // Hide this message
-      await submissionsAPI.hideMessage(submissionId, messageId)
-      hiddenMessageIds.value.add(messageId)
-    }
-  } catch (err) {
-    console.error('Failed to toggle hide:', err)
-  }
-}
-
-async function handleHideAllPrevious(messageId: string) {
-  try {
-    const response = await submissionsAPI.hideAllPrevious(submissionId, messageId)
-    
-    // Add all newly hidden message IDs to the set
-    for (const hiddenId of response.data.message_ids) {
-      hiddenMessageIds.value.add(hiddenId)
-    }
-  } catch (err) {
-    console.error('Failed to hide all previous:', err)
-  }
-}
-
-async function handleToggleHiddenFromModels(messageId: string) {
-  try {
-    const message = messages.value.find(m => m.id === messageId)
-    if (!message) return
-    
-    const newValue = !message.hidden_from_models
-    await submissionsAPI.setHiddenFromModels(submissionId, messageId, newValue)
-    
-    // Update local state
-    message.hidden_from_models = newValue
-  } catch (err) {
-    console.error('Failed to toggle hidden from models:', err)
-  }
-}
-
-async function handleToggleMonospace(messageId: string) {
-  try {
-    const message = messages.value.find(m => m.id === messageId)
-    if (!message) return
-    
-    const currentValue = message.metadata?.monospace === true
-    const newValue = !currentValue
-    
-    await submissionsAPI.setMessageMonospace(submissionId, messageId, newValue)
-    
-    // Update local state
-    if (!message.metadata) {
-      message.metadata = {}
-    }
-    message.metadata.monospace = newValue || undefined
-  } catch (err) {
-    console.error('Failed to toggle monospace:', err)
-  }
-}
-
-// Generic scroll to message function
-function scrollToMessage(messageId: string, highlightColor: string = 'ring-indigo-400') {
-  const messageEl = document.querySelector(`[data-message-id="${messageId}"]`) as HTMLElement
-  if (!messageEl) {
-    console.warn('[Scroll] Message element not found:', messageId)
-    return
-  }
-  
-  // Calculate position accounting for fixed header
-  const messageRect = messageEl.getBoundingClientRect()
-  const scrollOffset = window.scrollY + messageRect.top - headerHeight.value - 20 // 20px extra padding
-  
-  // Smooth scroll to calculated position
-  window.scrollTo({
-    top: scrollOffset,
-    behavior: 'smooth'
-  })
-  
-  // Briefly highlight the message
-  messageEl.classList.add('ring-2', highlightColor)
-  setTimeout(() => {
-    messageEl.classList.remove('ring-2', highlightColor)
-  }, 1500)
-}
-
-function scrollToPinnedMessage() {
-  if (!pinnedMessageId.value) {
-    console.log('[Pinned] No pinned message ID')
-    loadingPinnedMessage.value = false
-    return
-  }
-  
-  console.log('[Pinned] Looking for message:', pinnedMessageId.value)
-  console.log('[Pinned] Total messages loaded:', messages.value.length)
-  console.log('[Pinned] Message IDs:', messages.value.map(m => m.id))
-  
-  // Check if pinned message is in the loaded messages
-  const pinnedMsg = messages.value.find(m => m.id === pinnedMessageId.value)
-  if (!pinnedMsg) {
-    console.error('[Pinned] Pinned message ID not found in loaded messages!')
-    loadingPinnedMessage.value = false
-    return
-  }
-  
-  console.log('[Pinned] Found in messages array, now waiting for DOM element')
-  
-  // Wait for the pinned message element to exist in DOM (with timeout)
-  // Longer timeout for slow connections and mobile
-  const maxAttempts = 100 // 10 seconds max (100 * 100ms)
-  let attempts = 0
-  
-  const checkAndScroll = () => {
-    const messageEl = document.querySelector(`[data-message-id="${pinnedMessageId.value}"]`) as HTMLElement
-    
-    console.log(`[Pinned] Attempt ${attempts + 1}/${maxAttempts} - Element found:`, !!messageEl)
-    
-    if (messageEl) {
-      console.log('[Pinned] Element found! Clearing overlay and scrolling')
-      // Clear loading overlay immediately - we found the element!
-      loadingPinnedMessage.value = false
-      
-      // Use the generic scroll function with amber highlight for pinned
-      scrollToMessage(pinnedMessageId.value!, 'ring-amber-400')
-    } else if (attempts < maxAttempts) {
-      // Element not ready yet, try again
-      attempts++
-      setTimeout(checkAndScroll, 100)
-    } else {
-      // Timeout - element never appeared
-      console.error('[Pinned] TIMEOUT! Element never appeared in DOM after', maxAttempts, 'attempts')
-      console.error('[Pinned] All message elements:', document.querySelectorAll('[data-message-id]').length)
-      loadingPinnedMessage.value = false
-    }
-  }
-  
-  checkAndScroll()
-}
-
-async function handleToggleReaction(messageId: string, reactionType: 'star' | 'laugh' | 'sparkles') {
-  try {
-    const currentUserId = authStore.user?.id
-    if (!currentUserId) return
-    
-    const reactions = messageReactions.value.get(messageId) || []
-    const hasReacted = reactions.some(r => r.user_id === currentUserId && r.reaction_type === reactionType)
-    
-    if (hasReacted) {
-      // Remove reaction
-      await submissionsAPI.removeReaction(submissionId, messageId, reactionType)
-    } else {
-      // Add reaction
-      await submissionsAPI.addReaction(submissionId, messageId, reactionType)
-    }
-    
-    // Reload reactions for this message
-    const reactionResponse = await submissionsAPI.getReactions(submissionId, messageId)
-    if (reactionResponse.data.reactions.length > 0) {
-      messageReactions.value.set(messageId, reactionResponse.data.reactions)
-    } else {
-      messageReactions.value.delete(messageId)
-    }
-  } catch (err) {
-    console.error('Failed to toggle reaction:', err)
-  }
 }
 
 function handleTextSelected(messageId: string, text: string, start: number, end: number) {
@@ -1946,24 +1424,9 @@ const showTagPicker = ref(false)
 const showRatingForm = ref(false)
 const showStatsDetail = ref(false)
 const showMoreMenu = ref(false)
-const showFolderPicker = ref(false)
-const folderPickerLoading = ref(false)
-const folderPickerFolders = ref<Folder[]>([])
-const folderPickerExisting = ref<Set<string>>(new Set())
-const submissionFolderCount = ref(0)
-
-const folderPickerCurrentFolders = computed(() =>
-  folderPickerFolders.value.filter(f => folderPickerExisting.value.has(f.id))
-)
-const folderPickerAvailable = computed(() =>
-  folderPickerFolders.value.filter(f => !folderPickerExisting.value.has(f.id))
-)
 const activeSelectionId = ref<string | null>(null)
 const replyToCommentId = ref<string | null>(null)
 const commentContext = ref<{ messageId: string; text?: string; selectionId?: string } | null>(null)
-// Track expanded comment threads (by parent comment id)
-const expandedReplies = ref<Set<string>>(new Set())
-const expandedTopLevel = ref<Set<string>>(new Set()) // Track which selections show all top-level comments
 const conversationContainerEl = ref<HTMLElement | null>(null)
 const showSelectionToolbar = ref(false)
 
@@ -1978,215 +1441,15 @@ const commentInputPosition = ref({ x: 0, y: 0 })
 const showTextSelectionMenu = ref(false)
 const textSelectionMenuPosition = ref({ x: 0, y: 0 })
 const pendingTextSelection = ref<{ messageId: string; text: string; start: number; end: number } | null>(null)
-const headerEl = ref<HTMLElement | null>(null)
-const headerHeight = ref(0)
-const attachedRankingSystems = ref<any[]>([])
 const TAG_POPOVER_WIDTH = 224
-const allCriteria = ref<Map<string, any>>(new Map())
 
-// Computed helpers
-const totalCommentCount = computed(() => {
-  let count = 0
-  for (const data of selectionData.value.values()) {
-    count += data.comments.length
-  }
-  return count
-})
-
-// Messages that have comments (for highlight navigator)
-const messagesWithComments = computed(() => {
-  const ids = new Set<string>()
-  for (const sel of selections.value) {
-    const data = selectionData.value.get(sel.id)
-    if (data && data.comments.length > 0) {
-      ids.add(sel.start_message_id)
-    }
-  }
-  return ids
-})
-
-// Messages that have tags (for highlight navigator)
-const messagesWithTags = computed(() => {
-  const ids = new Set<string>()
-  for (const sel of selections.value) {
-    if (sel.annotation_tags && sel.annotation_tags.length > 0) {
-      ids.add(sel.start_message_id)
-    }
-  }
-  return ids
-})
-
-// Inline comments grouped by message ID (for mobile view)
-const inlineComments = computed(() => {
-  interface InlineComment {
-    id: string
-    selection_id: string
-    content: string
-    author_id: string
-    created_at: string
-    selection_text?: string
-    parent_id?: string
-    replies?: InlineComment[]
-  }
-  
-  const map = new Map<string, InlineComment[]>()
-  
-  for (const sel of selections.value) {
-    const data = selectionData.value.get(sel.id)
-    if (!data || data.comments.length === 0) continue
-    
-    const messageId = sel.start_message_id
-    if (!map.has(messageId)) {
-      map.set(messageId, [])
-    }
-    
-    // Build comment tree
-    const commentMap = new Map<string, InlineComment>()
-    const topLevel: InlineComment[] = []
-    
-    // First pass: create all comments
-    for (const comment of data.comments) {
-      const inlineComment: InlineComment = {
-        id: comment.id,
-        selection_id: sel.id,
-        content: comment.content,
-        author_id: comment.author_id,
-        created_at: comment.created_at,
-        selection_text: sel.selected_text?.slice(0, 50),
-        parent_id: comment.parent_id,
-        replies: []
-      }
-      commentMap.set(comment.id, inlineComment)
-    }
-    
-    // Second pass: build tree
-    for (const comment of data.comments) {
-      const inlineComment = commentMap.get(comment.id)!
-      if (comment.parent_id && commentMap.has(comment.parent_id)) {
-        commentMap.get(comment.parent_id)!.replies!.push(inlineComment)
-      } else {
-        topLevel.push(inlineComment)
-      }
-    }
-    
-    map.get(messageId)!.push(...topLevel)
-  }
-  
-  return map
-})
-
-// Per-system rating averages
-const systemRatingAverages = computed(() => {
-  const systemStats = new Map<string, { system_id: string; system_name: string; scores: number[]; max: number }>()
-  
-  for (const rating of submissionRatings.value) {
-    const criterion = allCriteria.value.get(rating.criterion_id)
-    if (!criterion) continue
-    
-    const systemId = criterion.ranking_system_id
-    if (!systemStats.has(systemId)) {
-      const systemDetail = rankingSystemDetails.value.get(systemId)
-      systemStats.set(systemId, {
-        system_id: systemId,
-        system_name: systemDetail?.data.ranking_system?.name || 'System',
-        scores: [],
-        max: criterion.scale_max || 5
-      })
-    }
-    systemStats.get(systemId)!.scores.push(rating.score)
-  }
-  
-  return Array.from(systemStats.values()).map(stat => ({
-    system_id: stat.system_id,
-    system_name: stat.system_name,
-    avg: stat.scores.reduce((a, b) => a + b, 0) / stat.scores.length,
-    count: stat.scores.length,
-    max: stat.max
-  }))
-})
-
-// Rating statistics
-const ratingStats = computed(() => {
-  const stats = new Map<string, { criterion_id: string; criterion_name: string; scores: number[]; max: number }>()
-  
-  for (const rating of submissionRatings.value) {
-    const criterion = allCriteria.value.get(rating.criterion_id)
-    if (!criterion) continue
-    
-    if (!stats.has(rating.criterion_id)) {
-      stats.set(rating.criterion_id, {
-        criterion_id: rating.criterion_id,
-        criterion_name: criterion.name,
-        scores: [],
-        max: criterion.scale_max
-      })
-    }
-    stats.get(rating.criterion_id)!.scores.push(rating.score)
-  }
-  
-  return Array.from(stats.values()).map(stat => ({
-    criterion_id: stat.criterion_id,
-    criterion_name: stat.criterion_name,
-    avg: stat.scores.reduce((a, b) => a + b, 0) / stat.scores.length,
-    count: stat.scores.length,
-    max: stat.max,
-    scores: stat.scores
-  })).sort((a, b) => b.count - a.count)
-})
-
-// Filter ratings to only current user's ratings
-const currentUserRatings = computed(() => {
-  const currentUserId = authStore.user?.id
-  if (!currentUserId) return []
-  return submissionRatings.value.filter(r => r.rater_id === currentUserId)
-})
-
-// Compute aggregates per criterion for display
-const criterionAggregates = computed(() => {
-  const aggregates = new Map<string, { avg: number; count: number; max: number }>()
-  
-  for (const rating of submissionRatings.value) {
-    const criterion = allCriteria.value.get(rating.criterion_id)
-    if (!criterion) continue
-    
-    if (!aggregates.has(rating.criterion_id)) {
-      aggregates.set(rating.criterion_id, {
-        avg: 0,
-        count: 0,
-        max: criterion.scale_max
-      })
-    }
-    const agg = aggregates.get(rating.criterion_id)!
-    agg.avg = ((agg.avg * agg.count) + rating.score) / (agg.count + 1)
-    agg.count++
-  }
-  
-  return aggregates
-})
-
-// Tag statistics
-const tagStats = computed(() => {
-  const stats = new Map<string, { tag_id: string; tag_name: string; count: number }>()
-  
-  for (const selection of selections.value) {
-    for (const tagId of selection.annotation_tags) {
-      const tag = allTags.value.get(tagId)
-      if (!tag) continue
-      
-      if (!stats.has(tagId)) {
-        stats.set(tagId, {
-          tag_id: tagId,
-          tag_name: tag.name,
-          count: 0
-        })
-      }
-      stats.get(tagId)!.count++
-    }
-  }
-  
-  return Array.from(stats.values()).sort((a, b) => b.count - a.count)
-})
-
+// Markdown / JSON export + copy helpers
+const {
+  exportAsMarkdown,
+  exportAsStandardJson,
+  exportAsMultiuserJson,
+  handleCopyMessage
+} = useExport({ submission, messages, submitterName, displayTags, showMoreMenu })
 
 // Ontologies for tag picker
 const ontologiesForPicker = computed(() => {
@@ -2205,9 +1468,6 @@ const ontologiesForPicker = computed(() => {
     .filter((item): item is { ontology: any; tags: any[] } => item !== null)
 })
 
-// Ranking systems for rating picker - need to store full system details
-const rankingSystemDetails = ref<Map<string, any>>(new Map())
-
 // Ranking systems for rating picker
 const rankingSystemsForPicker = computed(() => {
   return attachedRankingSystems.value.map(subRanking => {
@@ -2219,183 +1479,6 @@ const rankingSystemsForPicker = computed(() => {
       isFromTopic: subRanking.source === 'topic'  // From dynamic lookup
     }
   })
-})
-
-// Build vertical bars - one per selection
-const verticalBars = computed<VerticalBar[]>(() => {
-  const bars: VerticalBar[] = []
-  
-  for (const sel of selections.value) {
-    const data = selectionData.value.get(sel.id)
-    if (!data) continue
-    
-    // Determine color: use first tag's color, or generate from selection ID
-    let color = '#6B7280' // Default gray
-    if (data.tags.length > 0 && data.tags[0].color) {
-      color = data.tags[0].color
-    } else if (data.tags.length > 0) {
-      // Generate from tag name
-      let hash = 0
-      for (let i = 0; i < data.tags[0].name.length; i++) {
-        hash = data.tags[0].name.charCodeAt(i) + ((hash << 5) - hash)
-      }
-      const hue = hash % 360
-      color = `hsl(${hue}, 70%, 60%)`
-    }
-    
-    bars.push({
-      id: sel.id,
-      selectionId: sel.id,
-      startMessageId: sel.start_message_id,
-      endMessageId: sel.end_message_id,
-      color,
-      tags: data.tags
-    })
-  }
-  
-  return bars
-})
-
-// Build margin annotations - separate annotations for tags and comments
-const marginAnnotations = computed<MarginAnnotation[]>(() => {
-  const annotations: MarginAnnotation[] = []
-  
-  for (const sel of selections.value) {
-    const data = selectionData.value.get(sel.id)
-    if (!data) continue
-    
-    // Group tag attributions by tag_id
-    const tagGroups = new Map<string, typeof sel.tag_attributions>()
-    if (sel.tag_attributions) {
-      for (const attr of sel.tag_attributions) {
-        if (!tagGroups.has(attr.tag_id)) {
-          tagGroups.set(attr.tag_id, [])
-        }
-        tagGroups.get(attr.tag_id)!.push(attr)
-      }
-    }
-    
-    // Create one annotation per unique tag
-    for (const [tagId, attributions] of tagGroups) {
-      const tag = allTags.value.get(tagId)
-      if (!tag) continue
-      
-      annotations.push({
-        id: `tag-${sel.id}-${tagId}`,
-        type: 'tag-label',
-        anchorMessageId: sel.start_message_id,
-        priority: 5,
-        minHeight: 32,
-        data: {
-          selectionId: sel.id,
-          tag,
-          tagAttributions: attributions
-        }
-      })
-    }
-    
-    // Create one annotation per comment (with replies grouped after parents)
-    // Collapsing rules:
-    // - Show max 2 top-level comments unless expanded
-    // - Show max 1 level of replies unless expanded
-    const rootComments = data.comments.filter(c => !c.parent_id)
-    const showAllTopLevel = expandedTopLevel.value.has(sel.id)
-    const visibleRootComments = showAllTopLevel ? rootComments : rootComments.slice(0, 2)
-    const hiddenTopLevelCount = rootComments.length - visibleRootComments.length
-    
-    // Recursively add a comment and its replies
-    function addCommentWithReplies(comment: Comment, depth: number, parentId?: string) {
-      annotations.push({
-        id: `comment-${comment.id}`,
-        type: 'comment-card',
-        anchorMessageId: sel.start_message_id,
-        priority: 4 + depth,
-        minHeight: depth === 0 ? 80 : 60,
-        data: {
-          selectionId: sel.id,
-          selection: sel,
-          comment,
-          isReply: depth > 0,
-          depth
-        }
-      })
-      
-      // Find direct replies to this comment (data is guaranteed non-null by the guard above)
-      const directReplies = data!.comments.filter(c => c.parent_id === comment.id)
-      if (directReplies.length === 0) return
-      
-      // For depth 0 (root comments): show 1 reply, collapse rest
-      // For depth 1+: only show if parent is expanded
-      const isExpanded = expandedReplies.value.has(comment.id)
-      
-      if (depth === 0) {
-        // Show first reply always
-        const visibleReplies = isExpanded ? directReplies : directReplies.slice(0, 1)
-        const hiddenCount = directReplies.length - visibleReplies.length
-        
-        for (const reply of visibleReplies) {
-          addCommentWithReplies(reply, depth + 1, comment.id)
-        }
-        
-        // Add "show more" indicator if there are hidden replies
-        if (hiddenCount > 0) {
-          annotations.push({
-            id: `expand-replies-${comment.id}`,
-            type: 'expand-replies',
-            anchorMessageId: sel.start_message_id,
-            priority: 5,
-            minHeight: 24,
-            data: {
-              parentCommentId: comment.id,
-              hiddenCount,
-              depth: 1
-            }
-          })
-        }
-      } else if (isExpanded) {
-        // Deeper levels: only show if explicitly expanded
-        for (const reply of directReplies) {
-          addCommentWithReplies(reply, depth + 1, comment.id)
-        }
-      } else if (directReplies.length > 0) {
-        // Show "N more replies" indicator
-        annotations.push({
-          id: `expand-replies-${comment.id}`,
-          type: 'expand-replies',
-          anchorMessageId: sel.start_message_id,
-          priority: 5 + depth,
-          minHeight: 24,
-          data: {
-            parentCommentId: comment.id,
-            hiddenCount: directReplies.length,
-            depth: depth + 1
-          }
-        })
-      }
-    }
-    
-    // Start with visible root comments
-    for (const comment of visibleRootComments) {
-      addCommentWithReplies(comment, 0)
-    }
-    
-    // Add "show more comments" if there are hidden top-level comments
-    if (hiddenTopLevelCount > 0) {
-      annotations.push({
-        id: `expand-top-${sel.id}`,
-        type: 'expand-top-level',
-        anchorMessageId: sel.start_message_id,
-        priority: 10,
-        minHeight: 24,
-        data: {
-          selectionId: sel.id,
-          hiddenCount: hiddenTopLevelCount
-        }
-      })
-    }
-  }
-  
-  return annotations
 })
 
 // Build inline annotations for mobile (grouped by message)
@@ -2469,77 +1552,6 @@ async function submitComment(text: string) {
 }
 
 
-function startEditTitle() {
-  titleEdit.value = submission.value?.title || ''
-  editingTitle.value = true
-  setTimeout(() => titleInput.value?.focus(), 10)
-}
-
-async function saveTitle() {
-  if (!editingTitle.value) return
-  
-  const newTitle = titleEdit.value.trim()
-  if (!newTitle || newTitle === submission.value?.title) {
-    cancelEditTitle()
-    return
-  }
-  
-  try {
-    await submissionsAPI.update(submissionId, { title: newTitle })
-    
-    if (submission.value) {
-      submission.value.title = newTitle
-    }
-    editingTitle.value = false
-  } catch (err) {
-    console.error('Failed to save title:', err)
-    cancelEditTitle()
-  }
-}
-
-function cancelEditTitle() {
-  editingTitle.value = false
-  titleEdit.value = ''
-}
-
-function startEditDescription() {
-  descriptionEdit.value = submission.value?.metadata.description || ''
-  editingDescription.value = true
-  setTimeout(() => descriptionTextarea.value?.focus(), 10)
-}
-
-async function saveDescription() {
-  try {
-    await submissionsAPI.update(submissionId, { description: descriptionEdit.value })
-    
-    if (submission.value) {
-      submission.value.metadata.description = descriptionEdit.value
-    }
-    editingDescription.value = false
-  } catch (err) {
-    console.error('Failed to save description:', err)
-  }
-}
-
-function cancelEditDescription() {
-  editingDescription.value = false
-  descriptionEdit.value = ''
-}
-
-async function applyTopics(topicNames: string[]) {
-  try {
-    await submissionsAPI.update(submissionId, { tags: topicNames })
-    
-    if (submission.value) {
-      submission.value.metadata.tags = topicNames
-    }
-    showTopicSelector.value = false
-  } catch (err) {
-    console.error('Failed to save topics:', err)
-    showTopicSelector.value = false
-  }
-}
-
 function handleAddTag(selectionId: string) {
   activeSelectionId.value = selectionId
   showTagPicker.value = true
@@ -2603,71 +1615,6 @@ function handleAddCommentToSelection(selectionId: string) {
   showCommentForm.value = true
 }
 
-async function submitRatings(ratings: Array<{ criterion_id: string; score: number }>) {
-  try {
-    // Submit all ratings at submission level
-    for (const rating of ratings) {
-      await submissionsStore.createRating({
-        submission_id: submissionId,
-        criterion_id: rating.criterion_id,
-        score: rating.score
-      })
-    }
-    
-    // Refresh submission ratings (but keep form open for auto-save workflow)
-    submissionRatings.value = await submissionsStore.getRatingsBySubmission(submissionId)
-  } catch (err) {
-    console.error('Failed to submit ratings:', err)
-  }
-}
-
-async function handleDeleteSelection(selectionId: string) {
-  if (!confirm('Delete this selection and all its comments/ratings?')) return
-  
-  try {
-    await annotationsAPI.deleteSelection(selectionId)
-    
-    // Remove from UI
-    selections.value = selections.value.filter(s => s.id !== selectionId)
-    selectionData.value.delete(selectionId)
-  } catch (err) {
-    console.error('Failed to delete selection:', err)
-  }
-}
-
-async function handleDeleteComment(commentId: string) {
-  if (!confirm('Delete this comment?')) return
-  
-  try {
-    await annotationsAPI.deleteComment(commentId)
-    
-    // Remove from all selections' comments (including replies to this comment)
-    for (const data of selectionData.value.values()) {
-      data.comments = data.comments.filter(c => c.id !== commentId && c.parent_id !== commentId)
-    }
-  } catch (err) {
-    console.error('Failed to delete comment:', err)
-  }
-}
-
-async function handleEditComment(commentId: string, content: string) {
-  try {
-    await annotationsAPI.updateComment(commentId, content)
-    
-    // Update the comment in local state
-    for (const data of selectionData.value.values()) {
-      const comment = data.comments.find(c => c.id === commentId)
-      if (comment) {
-        comment.content = content
-        comment.updated_at = new Date().toISOString()
-        break
-      }
-    }
-  } catch (err) {
-    console.error('Failed to edit comment:', err)
-  }
-}
-
 function handleReplyToComment(selectionId: string, parentCommentId: string) {
   // Open comment form for reply
   activeSelectionId.value = selectionId
@@ -2683,26 +1630,6 @@ function handleReplyToComment(selectionId: string, parentCommentId: string) {
     selectionId
   }
   showCommentForm.value = true
-}
-
-function handleExpandReplies(parentCommentId: string) {
-  if (expandedReplies.value.has(parentCommentId)) {
-    expandedReplies.value.delete(parentCommentId)
-  } else {
-    expandedReplies.value.add(parentCommentId)
-  }
-  // Trigger reactivity
-  expandedReplies.value = new Set(expandedReplies.value)
-}
-
-function handleExpandTopLevel(selectionId: string) {
-  if (expandedTopLevel.value.has(selectionId)) {
-    expandedTopLevel.value.delete(selectionId)
-  } else {
-    expandedTopLevel.value.add(selectionId)
-  }
-  // Trigger reactivity
-  expandedTopLevel.value = new Set(expandedTopLevel.value)
 }
 
 async function handleRemoveTag(selectionId: string, tagId: string) {
@@ -2754,57 +1681,6 @@ async function handleDeleteSubmission() {
   } catch (err: any) {
     console.error('Failed to delete submission:', err)
     alert('Failed to delete submission: ' + (err.response?.data?.error || err.message))
-  }
-}
-
-async function loadSubmissionFolderCount() {
-  if (!authStore.isAuthenticated()) return
-  try {
-    const res = await foldersAPI.getBySubmission(submissionId)
-    submissionFolderCount.value = res.data.folders.length
-  } catch { /* ignore for unauthenticated */ }
-}
-
-async function openFolderPicker() {
-  showFolderPicker.value = true
-  folderPickerLoading.value = true
-  try {
-    const [foldersRes, existingRes] = await Promise.all([
-      foldersAPI.list(),
-      foldersAPI.getBySubmission(submissionId)
-    ])
-    folderPickerFolders.value = foldersRes.data.folders
-    folderPickerExisting.value = new Set(existingRes.data.folders.map(f => f.id))
-    submissionFolderCount.value = existingRes.data.folders.length
-  } catch (err) {
-    console.error('Failed to load folders:', err)
-  } finally {
-    folderPickerLoading.value = false
-  }
-}
-
-async function addToFolder(folderId: string) {
-  try {
-    await foldersAPI.addSubmission(folderId, submissionId)
-    folderPickerExisting.value = new Set([...folderPickerExisting.value, folderId])
-    submissionFolderCount.value = folderPickerExisting.value.size
-  } catch (err: any) {
-    console.error('Failed to add to folder:', err)
-    alert('Failed to add to folder: ' + (err.response?.data?.error || err.message))
-  }
-}
-
-async function removeFromFolder(folderId: string) {
-  if (!confirm('Remove this conversation from the folder?')) return
-  try {
-    await foldersAPI.removeSubmission(folderId, submissionId)
-    const next = new Set(folderPickerExisting.value)
-    next.delete(folderId)
-    folderPickerExisting.value = next
-    submissionFolderCount.value = next.size
-  } catch (err: any) {
-    console.error('Failed to remove from folder:', err)
-    alert('Failed to remove from folder: ' + (err.response?.data?.error || err.message))
   }
 }
 
